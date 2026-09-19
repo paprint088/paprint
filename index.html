@@ -70,7 +70,7 @@
   }
 
   /* Header */
-  .mark { display: block; margin-bottom: 14px; }
+  .mark { display: block; }
   h1 {
     margin: 0 0 14px;
     font-family: "Bricolage Grotesque", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
@@ -127,6 +127,77 @@
   .b-whatsapp { background: #128C4B; }
   .b-viber { background: #7360F2; }
   .b-telegram { background: #1E8FC9; }
+  /* Email + Messenger side by side */
+  .row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .row .tab { gap: 8px; padding: 6px 8px; min-width: 0; font-size: 0.95rem; }
+  .row .badge { width: 28px; height: 28px; font-size: 0.9rem; }
+
+  /* Small Free WiFi button, top right */
+  .topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+  .wifi-pill {
+    appearance: none;
+    -webkit-appearance: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    min-height: 36px;
+    padding: 4px 12px;
+    background: var(--surface);
+    color: var(--ink);
+    border: 1.5px solid var(--ink);
+    border-radius: 999px;
+    font: inherit;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .wifi-pill:focus-visible, .close:focus-visible {
+    outline: 3px solid var(--focus);
+    outline-offset: 2px;
+  }
+
+  /* Free WiFi pop-up */
+  .overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 18px;
+    background: rgba(8, 14, 26, 0.55);
+  }
+  .dialog {
+    position: relative;
+    width: 100%;
+    max-width: 400px;
+    background: var(--surface);
+    color: var(--ink);
+    border: 1.5px solid var(--line);
+    border-radius: 18px;
+    padding: 22px 18px 18px;
+  }
+  .dialog h2 {
+    margin: 0 40px 10px 0;
+    font-family: "Bricolage Grotesque", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+    font-size: 1.25rem;
+  }
+  .dialog p { margin: 0 0 10px; }
+  .dialog .ask { font-weight: 600; margin-bottom: 16px; }
+  .dialog .btn { width: 100%; }
+  .close {
+    position: absolute;
+    top: 10px; right: 10px;
+    width: 36px; height: 36px;
+    display: grid; place-items: center;
+    background: transparent;
+    color: var(--ink);
+    border: 1.5px solid var(--line);
+    border-radius: 50%;
+    font-size: 1.3rem;
+    line-height: 1;
+    cursor: pointer;
+  }
 
   /* Bracketed group */
   .group {
@@ -201,6 +272,7 @@
 
   .toast {
     position: fixed;
+    z-index: 20;
     left: 50%;
     bottom: calc(24px + env(safe-area-inset-bottom));
     transform: translate(-50%, 16px);
@@ -223,24 +295,29 @@
 <body>
 <main>
   <header>
+    <div class="topbar">
     <svg class="mark" width="56" height="20" viewBox="0 0 56 20" aria-hidden="true">
       <circle cx="8" cy="10" r="7" fill="var(--cyan)"/>
       <circle cx="21" cy="10" r="7" fill="var(--magenta)" style="mix-blend-mode:multiply"/>
       <circle cx="34" cy="10" r="7" fill="var(--yellow)" style="mix-blend-mode:multiply"/>
       <circle cx="47" cy="10" r="7" fill="var(--ink)"/>
     </svg>
+    <button class="wifi-pill" id="wifiBtn" type="button" aria-haspopup="dialog" aria-expanded="false">📶 Free WiFi</button>
+    </div>
     <h1>PaPrint &amp; Copy</h1>
     <p class="en">Please select which options would you like to send your files</p>
     <p class="tl"><em lang="tl">Pumili ng paraan kung paano mag padala ng files</em></p>
   </header>
 
   <div class="tabs" role="tablist" aria-label="Ways to send your files">
+    <div class="row">
     <button class="tab" role="tab" id="tab-email" data-key="email" aria-selected="true" aria-controls="panel">
       <span class="badge b-email" aria-hidden="true">@</span>Email
     </button>
     <button class="tab" role="tab" id="tab-messenger" data-key="messenger" aria-selected="false" aria-controls="panel" tabindex="-1">
       <span class="badge b-messenger" aria-hidden="true">M</span>Messenger
     </button>
+    </div>
 
     <div class="group">
       <div class="stack">
@@ -275,6 +352,16 @@
     </div>
   </section>
 </main>
+
+<div class="overlay" id="wifiOverlay" hidden>
+  <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="wifiTitle">
+    <button class="close" id="wifiClose" type="button" aria-label="Close">&times;</button>
+    <h2 id="wifiTitle">📶 Free WiFi</h2>
+    <p>Mabagal po dito sa loob. We can provide you Limited Time free connection.</p>
+    <p class="ask">Pls. connect to 3M PisoWiFi. Ask counter for Voucher Code.</p>
+    <button class="btn primary" id="wifiGo" type="button">Connect to WiFi</button>
+  </div>
+</div>
 
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
@@ -329,7 +416,7 @@
     badge.className = "badge " + c.cls;
     badge.textContent = c.badge;
     document.getElementById("pName").textContent = c.name;
-    document.getElementById("pValue").textContent = c.value;
+    document.getElementById("pValue").textContent = c.display || c.value;
     document.getElementById("pNote").textContent = c.note;
     document.getElementById("pCopy").textContent = c.copy;
     var open = document.getElementById("pOpen");
@@ -398,6 +485,33 @@
   });
   document.getElementById("chip").addEventListener("click", function () {
     copyText(NUMBER, "Number");
+  });
+
+  // Free WiFi pop-up
+  var overlay = document.getElementById("wifiOverlay");
+  var wifiBtn = document.getElementById("wifiBtn");
+  function openWifi() {
+    overlay.hidden = false;
+    wifiBtn.setAttribute("aria-expanded", "true");
+    document.getElementById("wifiGo").focus();
+  }
+  function closeWifi() {
+    overlay.hidden = true;
+    wifiBtn.setAttribute("aria-expanded", "false");
+    wifiBtn.focus();
+  }
+  wifiBtn.addEventListener("click", openWifi);
+  document.getElementById("wifiClose").addEventListener("click", closeWifi);
+  overlay.addEventListener("click", function (e) { if (e.target === overlay) closeWifi(); });
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape" && !overlay.hidden) closeWifi();
+  });
+  document.getElementById("wifiGo").addEventListener("click", function () {
+    if (/android/i.test(navigator.userAgent)) {
+      window.location.href = "intent:#Intent;action=android.settings.WIFI_SETTINGS;end";
+    } else {
+      toast("Open Settings \u203A Wi-Fi and choose 3M PisoWiFi");
+    }
   });
 
   select("email", false);
