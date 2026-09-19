@@ -1,0 +1,405 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#EEF3F6">
+<title>PaPrint &amp; Copy</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #EEF3F6;
+    --surface: #FFFFFF;
+    --ink: #101B2D;
+    --muted: #556275;
+    --line: #C9D4DE;
+    --primary: #006E96;
+    --on-primary: #FFFFFF;
+    --cyan: #00A3D9;
+    --magenta: #D4146F;
+    --yellow: #FFC61A;
+    --focus: #D4146F;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0C1220;
+      --surface: #151E31;
+      --ink: #EAF0F6;
+      --muted: #98A4B8;
+      --line: #2B3752;
+      --primary: #35C2F0;
+      --on-primary: #06121C;
+      --cyan: #35C2F0;
+      --magenta: #FF5AA5;
+      --yellow: #FFD54A;
+      --focus: #FFD54A;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0C1220;
+    --surface: #151E31;
+    --ink: #EAF0F6;
+    --muted: #98A4B8;
+    --line: #2B3752;
+    --primary: #35C2F0;
+    --on-primary: #06121C;
+    --cyan: #35C2F0;
+    --magenta: #FF5AA5;
+    --yellow: #FFD54A;
+    --focus: #FFD54A;
+  }
+
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "Instrument Sans", system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 16px;
+    line-height: 1.5;
+    padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+  }
+  main {
+    max-width: 480px;
+    margin: 0 auto;
+    padding: 28px 18px 48px;
+  }
+
+  /* Header */
+  .mark { display: block; margin-bottom: 14px; }
+  h1 {
+    margin: 0 0 14px;
+    font-family: "Bricolage Grotesque", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+    font-weight: 800;
+    font-size: clamp(2.3rem, 11vw, 3rem);
+    line-height: 1;
+    letter-spacing: -0.02em;
+  }
+  .en { margin: 0; font-size: 1.05rem; font-weight: 500; }
+  .tl { margin: 4px 0 0; font-style: italic; color: var(--muted); }
+
+  /* Tabs */
+  .tabs { display: flex; flex-direction: column; gap: 10px; margin: 26px 0 18px; }
+  .tab {
+    appearance: none;
+    -webkit-appearance: none;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    min-height: 52px;
+    padding: 8px 14px 8px 10px;
+    background: var(--surface);
+    color: var(--ink);
+    border: 1.5px solid var(--line);
+    border-radius: 14px;
+    font: inherit;
+    font-weight: 600;
+    text-align: left;
+    cursor: pointer;
+    transition: background-color .15s ease, color .15s ease, border-color .15s ease;
+  }
+  .tab[aria-selected="true"] {
+    background: var(--ink);
+    color: var(--bg);
+    border-color: var(--ink);
+  }
+  .tab:focus-visible, .btn:focus-visible, .chip:focus-visible {
+    outline: 3px solid var(--focus);
+    outline-offset: 2px;
+  }
+  .badge {
+    flex: none;
+    width: 34px; height: 34px;
+    border-radius: 50%;
+    display: grid; place-items: center;
+    color: #fff;
+    font-weight: 700;
+    font-size: 1rem;
+    line-height: 1;
+  }
+  .b-email { background: #5B6B80; }
+  .b-messenger { background: #0A7CFF; }
+  .b-whatsapp { background: #128C4B; }
+  .b-viber { background: #7360F2; }
+  .b-telegram { background: #1E8FC9; }
+
+  /* Bracketed group */
+  .group {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 22px auto;
+    align-items: stretch;
+    column-gap: 4px;
+  }
+  .group .stack { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+  .brace { width: 22px; height: 100%; display: block; color: var(--ink); }
+  .chip {
+    appearance: none;
+    -webkit-appearance: none;
+    align-self: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    padding: 10px 12px;
+    background: var(--surface);
+    color: var(--ink);
+    border: 1.5px solid var(--ink);
+    border-radius: 14px;
+    font: inherit;
+    cursor: pointer;
+  }
+  .chip .num {
+    font-family: "Bricolage Grotesque", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+    font-weight: 700;
+    font-size: 1.1rem;
+    letter-spacing: 0.01em;
+    font-variant-numeric: tabular-nums;
+  }
+  .chip .hint { font-size: 0.75rem; color: var(--muted); }
+
+  /* Detail panel */
+  .panel {
+    background: var(--surface);
+    border: 1.5px solid var(--line);
+    border-radius: 18px;
+    padding: 18px;
+  }
+  .panel .who { display: flex; align-items: center; gap: 10px; font-weight: 600; margin-bottom: 10px; }
+  .panel .value {
+    font-family: "Bricolage Grotesque", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+    font-weight: 700;
+    font-size: clamp(1.35rem, 6.5vw, 1.7rem);
+    line-height: 1.2;
+    word-break: break-word;
+    margin: 0 0 6px;
+    font-variant-numeric: tabular-nums;
+  }
+  .panel .note { margin: 0 0 16px; color: var(--muted); font-size: 0.95rem; }
+  .actions { display: flex; flex-wrap: wrap; gap: 10px; }
+  .btn {
+    appearance: none;
+    -webkit-appearance: none;
+    flex: 1 1 140px;
+    min-height: 50px;
+    display: inline-flex; align-items: center; justify-content: center;
+    padding: 10px 16px;
+    border-radius: 14px;
+    border: 1.5px solid var(--primary);
+    font: inherit;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+  }
+  .btn.primary { background: var(--primary); color: var(--on-primary); }
+  .btn.ghost { background: transparent; color: var(--ink); border-color: var(--line); }
+  [hidden] { display: none !important; }
+
+  .toast {
+    position: fixed;
+    left: 50%;
+    bottom: calc(24px + env(safe-area-inset-bottom));
+    transform: translate(-50%, 16px);
+    background: var(--ink);
+    color: var(--bg);
+    padding: 10px 18px;
+    border-radius: 999px;
+    font-weight: 600;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .2s ease, transform .2s ease;
+  }
+  .toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; }
+  }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <svg class="mark" width="56" height="20" viewBox="0 0 56 20" aria-hidden="true">
+      <circle cx="8" cy="10" r="7" fill="var(--cyan)"/>
+      <circle cx="21" cy="10" r="7" fill="var(--magenta)" style="mix-blend-mode:multiply"/>
+      <circle cx="34" cy="10" r="7" fill="var(--yellow)" style="mix-blend-mode:multiply"/>
+      <circle cx="47" cy="10" r="7" fill="var(--ink)"/>
+    </svg>
+    <h1>PaPrint &amp; Copy</h1>
+    <p class="en">Please select which options would you like to send your files</p>
+    <p class="tl"><em lang="tl">Pumili ng paraan kung paano mag padala ng files</em></p>
+  </header>
+
+  <div class="tabs" role="tablist" aria-label="Ways to send your files">
+    <button class="tab" role="tab" id="tab-email" data-key="email" aria-selected="true" aria-controls="panel">
+      <span class="badge b-email" aria-hidden="true">@</span>Email
+    </button>
+    <button class="tab" role="tab" id="tab-messenger" data-key="messenger" aria-selected="false" aria-controls="panel" tabindex="-1">
+      <span class="badge b-messenger" aria-hidden="true">M</span>Messenger
+    </button>
+
+    <div class="group">
+      <div class="stack">
+        <button class="tab" role="tab" id="tab-whatsapp" data-key="whatsapp" aria-selected="false" aria-controls="panel" tabindex="-1">
+          <span class="badge b-whatsapp" aria-hidden="true">W</span>WhatsApp
+        </button>
+        <button class="tab" role="tab" id="tab-viber" data-key="viber" aria-selected="false" aria-controls="panel" tabindex="-1">
+          <span class="badge b-viber" aria-hidden="true">V</span>Viber
+        </button>
+        <button class="tab" role="tab" id="tab-telegram" data-key="telegram" aria-selected="false" aria-controls="panel" tabindex="-1">
+          <span class="badge b-telegram" aria-hidden="true">T</span>Telegram
+        </button>
+      </div>
+      <svg class="brace" viewBox="0 0 20 100" preserveAspectRatio="none" aria-hidden="true">
+        <path d="M2 2 Q10 2 10 12 L10 40 Q10 50 18 50 Q10 50 10 60 L10 88 Q10 98 2 98"
+              fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" vector-effect="non-scaling-stroke"/>
+      </svg>
+      <button class="chip" id="chip" type="button" aria-label="Copy number 09497218888">
+        <span class="num">09497218888</span>
+        <span class="hint">tap to copy</span>
+      </button>
+    </div>
+  </div>
+
+  <section class="panel" id="panel" role="tabpanel" aria-live="polite">
+    <div class="who"><span class="badge" id="pBadge" aria-hidden="true"></span><span id="pName"></span></div>
+    <p class="value" id="pValue"></p>
+    <p class="note" id="pNote"></p>
+    <div class="actions">
+      <button class="btn primary" id="pCopy" type="button"></button>
+      <a class="btn ghost" id="pOpen" target="_blank" rel="noopener"></a>
+    </div>
+  </section>
+</main>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+  var NUMBER = "09497218888";
+  var CH = {
+    email: {
+      name: "Email", badge: "@", cls: "b-email", value: "paprint088@gmail.com",
+      note: "Attach your files to an email and send.",
+      copy: "Copy email", open: "Open email app",
+      href: "mailto:paprint088@gmail.com?subject=Files%20to%20print"
+    },
+    messenger: {
+      name: "Messenger", badge: "M", cls: "b-messenger", value: "xerox at print pasay",
+      note: "Search this name in Messenger, then send your files.",
+      copy: "Copy name", open: null, href: null
+    },
+    whatsapp: {
+      name: "WhatsApp", badge: "W", cls: "b-whatsapp", value: NUMBER,
+      note: "Same number for WhatsApp, Viber and Telegram.",
+      copy: "Copy number", open: "Open WhatsApp",
+      href: "https://wa.me/639497218888"
+    },
+    viber: {
+      name: "Viber", badge: "V", cls: "b-viber", value: NUMBER,
+      note: "Same number for WhatsApp, Viber and Telegram.",
+      copy: "Copy number", open: "Open Viber",
+      href: "viber://chat?number=%2B639497218888"
+    },
+    telegram: {
+      name: "Telegram", badge: "T", cls: "b-telegram", value: NUMBER,
+      note: "Same number for WhatsApp, Viber and Telegram.",
+      copy: "Copy number", open: "Open Telegram",
+      href: "https://t.me/+639497218888"
+    }
+  };
+
+  var tabs = Array.prototype.slice.call(document.querySelectorAll(".tab"));
+  var current = "email";
+
+  function select(key, focus) {
+    var c = CH[key];
+    current = key;
+    tabs.forEach(function (t) {
+      var on = t.getAttribute("data-key") === key;
+      t.setAttribute("aria-selected", on ? "true" : "false");
+      t.tabIndex = on ? 0 : -1;
+      if (on && focus) t.focus();
+    });
+    var badge = document.getElementById("pBadge");
+    badge.className = "badge " + c.cls;
+    badge.textContent = c.badge;
+    document.getElementById("pName").textContent = c.name;
+    document.getElementById("pValue").textContent = c.value;
+    document.getElementById("pNote").textContent = c.note;
+    document.getElementById("pCopy").textContent = c.copy;
+    var open = document.getElementById("pOpen");
+    if (c.href) {
+      open.hidden = false;
+      open.textContent = c.open;
+      open.setAttribute("href", c.href);
+    } else {
+      open.hidden = true;
+      open.removeAttribute("href");
+    }
+    document.getElementById("panel").setAttribute("aria-labelledby", "tab-" + key);
+  }
+
+  function toast(msg) {
+    var el = document.getElementById("toast");
+    el.textContent = msg;
+    el.classList.add("show");
+    clearTimeout(toast._t);
+    toast._t = setTimeout(function () { el.classList.remove("show"); }, 1600);
+  }
+
+  function copyText(text, label) {
+    function fallback() {
+      var ta = document.createElement("textarea");
+      ta.value = text;
+      ta.setAttribute("readonly", "");
+      ta.style.position = "fixed";
+      ta.style.opacity = "0";
+      document.body.appendChild(ta);
+      ta.select();
+      ta.setSelectionRange(0, text.length);
+      var ok = false;
+      try { ok = document.execCommand("copy"); } catch (e) {}
+      document.body.removeChild(ta);
+      toast(ok ? label + " copied" : "Press and hold to copy");
+    }
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(text).then(
+        function () { toast(label + " copied"); },
+        fallback
+      );
+    } else {
+      fallback();
+    }
+  }
+
+  tabs.forEach(function (t) {
+    t.addEventListener("click", function () { select(t.getAttribute("data-key"), false); });
+    t.addEventListener("keydown", function (e) {
+      var i = tabs.indexOf(t), n = tabs.length, next = null;
+      if (e.key === "ArrowDown" || e.key === "ArrowRight") next = (i + 1) % n;
+      else if (e.key === "ArrowUp" || e.key === "ArrowLeft") next = (i - 1 + n) % n;
+      else if (e.key === "Home") next = 0;
+      else if (e.key === "End") next = n - 1;
+      if (next !== null) {
+        e.preventDefault();
+        select(tabs[next].getAttribute("data-key"), true);
+      }
+    });
+  });
+
+  document.getElementById("pCopy").addEventListener("click", function () {
+    var c = CH[current];
+    copyText(c.value, current === "email" ? "Email" : current === "messenger" ? "Name" : "Number");
+  });
+  document.getElementById("chip").addEventListener("click", function () {
+    copyText(NUMBER, "Number");
+  });
+
+  select("email", false);
+</script>
+</body>
+</html>
