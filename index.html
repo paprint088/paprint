@@ -127,6 +127,19 @@
   .b-whatsapp { background: #128C4B; }
   .b-viber { background: #7360F2; }
   .b-telegram { background: #1E8FC9; }
+  /* In-app browser banner */
+  .iab {
+    background: var(--surface);
+    border: 1.5px solid var(--magenta);
+    border-radius: 14px;
+    padding: 12px 14px 10px;
+    margin-bottom: 18px;
+    font-size: 0.92rem;
+  }
+  .iab p { margin: 0 0 10px; }
+  .iab .btn { width: 100%; min-height: 44px; }
+  .iab .iab-tip { margin: 10px 0 0; color: var(--muted); font-size: 0.85rem; }
+
   /* Email + Messenger side by side */
   .row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
   .row .tab { gap: 8px; padding: 6px 8px; min-width: 0; font-size: 0.95rem; }
@@ -294,6 +307,11 @@
 </head>
 <body>
 <main>
+  <div class="iab" id="iab" hidden>
+    <p>You're inside another app's browser. Open this page in your phone's browser for the best experience.</p>
+    <button class="btn primary" id="iabOpen" type="button">Open in browser</button>
+    <p class="iab-tip" id="iabTip"></p>
+  </div>
   <header>
     <div class="topbar">
     <svg class="mark" width="56" height="20" viewBox="0 0 56 20" aria-hidden="true">
@@ -357,8 +375,8 @@
   <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="wifiTitle">
     <button class="close" id="wifiClose" type="button" aria-label="Close">&times;</button>
     <h2 id="wifiTitle">📶 Free WiFi</h2>
-    <p>Mabagal po dito sa loob. We can provide you Limited Time free connection.</p>
-    <p class="ask">Pls. connect to 3M PisoWiFi. Ask counter for Voucher Code.</p>
+    <p>Mabagal po data dito sa loob. We can provide you Limited Time free connection.</p>
+    <p class="ask">Pls. connect to &quot;3M PisoWiFi&quot;. Ask counter for Voucher Code.</p>
     <button class="btn primary" id="wifiGo" type="button">Connect to WiFi</button>
   </div>
 </div>
@@ -366,6 +384,39 @@
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script>
+  // Break out of in-app browsers (Messenger, Facebook, Viber, etc.)
+  (function () {
+    var ua = navigator.userAgent || "";
+    var isAndroid = /android/i.test(ua);
+    var inApp = /FBAN|FBAV|FB_IAB|FBIOS|Messenger|Instagram|Line\/|Viber|Snapchat|MicroMessenger|TikTok|BytedanceWebview|Twitter/i.test(ua) ||
+                (isAndroid && /; wv\)/.test(ua));
+    if (!inApp) return;
+
+    var scheme = location.protocol.replace(":", "");
+    function androidIntent() {
+      return "intent://" + location.host + location.pathname + location.search +
+        "#Intent;scheme=" + scheme + ";action=android.intent.action.VIEW;" +
+        "category=android.intent.category.BROWSABLE;end";
+    }
+
+    document.getElementById("iab").hidden = false;
+    var openBtn = document.getElementById("iabOpen");
+    openBtn.textContent = isAndroid ? "Open in browser" : "Copy link";
+    document.getElementById("iabTip").textContent = isAndroid
+      ? "If nothing happens, tap the \u22EE or \u2022\u2022\u2022 menu at the top and choose \u201COpen in browser\u201D."
+      : "Tap \u2022\u2022\u2022 or the Share icon at the top and choose \u201COpen in Safari\u201D (or \u201COpen in Browser\u201D), or copy the link and paste it in Safari.";
+
+    openBtn.addEventListener("click", function () {
+      if (isAndroid) window.location.href = androidIntent();
+      else copyText(location.href, "Link");
+    });
+
+    // Android: try to jump out automatically
+    if (isAndroid && (scheme === "https" || scheme === "http")) {
+      window.location.href = androidIntent();
+    }
+  })();
+
   var NUMBER = "09497218888";
   var CH = {
     email: {
