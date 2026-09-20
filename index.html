@@ -66,7 +66,11 @@
   main {
     max-width: 480px;
     margin: 0 auto;
-    padding: 28px 18px 48px;
+    padding: 28px 18px 28px;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    min-height: calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom));
   }
   [hidden] { display: none !important; }
 
@@ -132,6 +136,46 @@
 
   /* Home menu */
   .menu { display: flex; flex-direction: column; gap: 12px; }
+  .foot {
+    margin: auto 0 0;
+    padding-top: 28px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    text-align: center;
+    font-size: 0.75rem;
+    color: #6B7280;
+  }
+  .foot .copy { display: flex; align-items: center; justify-content: center; gap: 8px; }
+  .foot svg { flex: none; }
+  .legal {
+    color: inherit;
+    text-decoration: none;
+    padding: 6px 8px;
+  }
+  .legal:focus-visible {
+    outline: 3px solid var(--focus);
+    outline-offset: 2px;
+    border-radius: 6px;
+  }
+
+  /* Data Privacy Act page text */
+  .doc p { margin: 0 0 14px; font-size: 0.95rem; }
+  .doc .consent {
+    padding: 12px 14px;
+    background: var(--surface);
+    border: 1.5px solid var(--line);
+    border-left: 4px solid var(--cyan);
+    border-radius: 12px;
+  }
+  .doc ul { margin: 0 0 14px; padding-left: 20px; font-size: 0.95rem; }
+  .doc li { margin-bottom: 8px; }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) .foot { color: #8B93A1; }
+  }
+  :root[data-theme="dark"] .foot { color: #8B93A1; }
   .menu-btn {
     appearance: none;
     -webkit-appearance: none;
@@ -185,6 +229,24 @@
     cursor: pointer;
   }
   .soon { margin: 0; color: var(--muted); }
+
+  /* Scrolling notice */
+  .marquee {
+    overflow: hidden;
+    margin-top: 8px;
+    white-space: nowrap;
+    font-size: 0.8rem;
+    color: var(--muted);
+  }
+  .marquee-track {
+    display: inline-flex;
+    animation: marquee-scroll 20s linear infinite;
+  }
+  .marquee-track span { padding-right: 3rem; }
+  @keyframes marquee-scroll {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
 
   /* Options */
   .tabs { display: flex; flex-direction: column; gap: 10px; margin: 26px 0 0; }
@@ -367,6 +429,10 @@
 
   @media (prefers-reduced-motion: reduce) {
     * { transition: none !important; animation: none !important; }
+    .marquee { white-space: normal; }
+    .marquee-track { display: block; }
+    .marquee-track span { padding-right: 0; }
+    .marquee-track span:nth-child(n+2) { display: none; }
   }
 </style>
 </head>
@@ -415,6 +481,14 @@
     </div>
     <p class="en">Please select which options would you like to send your files</p>
     <p class="tl"><em lang="tl">Pumili ng paraan kung paano mag padala ng files</em></p>
+    <div class="marquee" role="note" aria-label="All files are confidential and will be deleted subsequently">
+      <div class="marquee-track" aria-hidden="true">
+        <span>All files are confidential and will be deleted subsequently</span>
+        <span>All files are confidential and will be deleted subsequently</span>
+        <span>All files are confidential and will be deleted subsequently</span>
+        <span>All files are confidential and will be deleted subsequently</span>
+      </div>
+    </div>
 
     <div class="tabs" role="group" aria-label="Ways to send your files">
       <div class="row">
@@ -467,6 +541,43 @@
     </div>
     <p class="soon">Coming soon.</p>
   </section>
+
+  <!-- DATA PRIVACY ACT OF 2012 -->
+  <section class="view" id="view-privacy" hidden>
+    <div class="subhead">
+      <h2 class="page-title">Data Privacy Act of 2012</h2>
+      <button class="back" type="button" data-go="home"><span aria-hidden="true">‹</span> Home</button>
+    </div>
+    <div class="doc">
+      <p class="consent">I agree to the collection and use of the data that I will provide through this form for the purpose of printing of member requested details and or booking of an appointment. I understand that the collection and use of this data, which may include personal and sensitive personal information, shall be in accordance with the Data Privacy Act of 2012.</p>
+
+      <p>Inknet Trading (the ‘Company’) needs to collect information (User Data) for limited purposes from a Customer (the ‘Customer’). The purpose of processing User Data is for the delivery of print and copy services. Data Protection is the safeguarding of the privacy rights of the Customer in relation to the processing of User Data.</p>
+
+      <p>This is a statement of the Company’s commitment to protect the rights and privacy of the Customer in accordance with the Republic Act 10173 or the Data Privacy Act of 2012.</p>
+
+      <p>The Company will obtain and process User Data fairly and in accordance with the fulfilment of its functions. The User Data obtained during the fulfilment of its functions during a Customer session are as follows:</p>
+
+      <ul>
+        <li><strong>Printing:</strong> The Customer’s documents submitted for print purposes. Additionally, the Customer’s email address is required to be submitted for the purpose of submission of print jobs via email.</li>
+        <li><strong>Scanning / Copying:</strong> The Customer’s documents submitted for scanning purposes. Additionally, the Customer’s email is required to be submitted for the purpose of scanning document and sending soft copies to email.</li>
+      </ul>
+
+      <p>The Company will keep data for purposes outlined in the previous section that are specific, lawful and clearly stated and the data will only be processed in a manner compatible with these purposes. The Company will not retain or disclose User Data for any purpose other than for delivery of its services.</p>
+    </div>
+  </section>
+
+  <footer class="foot" id="siteFoot">
+    <a class="legal" href="#privacy" data-go="privacy">Data Privacy Act of 2012</a>
+    <div class="copy">
+      <svg width="40" height="14" viewBox="0 0 56 20" aria-hidden="true">
+        <circle cx="8" cy="10" r="7" fill="var(--cyan)"/>
+        <circle cx="21" cy="10" r="7" fill="var(--magenta)" style="mix-blend-mode:multiply"/>
+        <circle cx="34" cy="10" r="7" fill="var(--yellow)" style="mix-blend-mode:multiply"/>
+        <circle cx="47" cy="10" r="7" fill="var(--ink)"/>
+      </svg>
+      <span>&copy; 2026 PaPrint &amp; Copy, Phils</span>
+    </div>
+  </footer>
 </main>
 
 <div class="overlay" id="overlay" hidden>
@@ -661,12 +772,13 @@
   });
 
   // ---------- Pages (Home, Printing, ...) ----------
-  var VIEWS = { home: "view-home", printing: "view-printing", online: "view-online", documents: "view-documents" };
+  var VIEWS = { home: "view-home", printing: "view-printing", online: "view-online", documents: "view-documents", privacy: "view-privacy" };
   var TITLES = {
     home: "PaPrint & Copy",
     printing: "Printing \u00B7 PaPrint & Copy",
     online: "Online Assistance \u00B7 PaPrint & Copy",
-    documents: "Document Services \u00B7 PaPrint & Copy"
+    documents: "Document Services \u00B7 PaPrint & Copy",
+    privacy: "Data Privacy Act of 2012 \u00B7 PaPrint & Copy"
   };
 
   function show(name) {
@@ -674,6 +786,7 @@
       document.getElementById(VIEWS[k]).hidden = (k !== name);
     });
     document.title = TITLES[name];
+    document.getElementById("siteFoot").hidden = !(name === "home" || name === "printing" || name === "privacy");
     if (!overlay.hidden) {
       overlay.hidden = true;
       tabs.forEach(function (t) { t.classList.remove("is-selected"); });
@@ -690,7 +803,10 @@
   }
 
   Array.prototype.forEach.call(document.querySelectorAll("[data-go]"), function (el) {
-    el.addEventListener("click", function () { go(el.getAttribute("data-go")); });
+    el.addEventListener("click", function (e) {
+      if (e && e.preventDefault) e.preventDefault();
+      go(el.getAttribute("data-go"));
+    });
   });
   window.addEventListener("hashchange", routeFromHash);
 
