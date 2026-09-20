@@ -68,9 +68,10 @@
     margin: 0 auto;
     padding: 28px 18px 48px;
   }
+  [hidden] { display: none !important; }
 
   /* Header */
-  .mark { display: block; }
+  .mark { display: block; margin-bottom: 14px; }
   h1 {
     margin: 0 0 14px;
     font-family: "Bricolage Grotesque", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
@@ -82,8 +83,22 @@
   .en { margin: 0; font-size: 1.05rem; font-weight: 500; }
   .tl { margin: 4px 0 0; font-style: italic; color: var(--muted); }
 
-  /* Tabs */
-  .tabs { display: flex; flex-direction: column; gap: 10px; margin: 26px 0 18px; }
+  /* In-app browser banner */
+  .iab {
+    background: var(--surface);
+    border: 1.5px solid var(--magenta);
+    border-radius: 14px;
+    padding: 12px 14px 10px;
+    margin-bottom: 18px;
+    font-size: 0.92rem;
+  }
+  .iab p { margin: 0 0 10px; }
+  .iab .btn { width: 100%; min-height: 44px; }
+  .iab .iab-tip { margin: 10px 0 0; color: var(--muted); font-size: 0.85rem; }
+
+  /* Options */
+  .tabs { display: flex; flex-direction: column; gap: 10px; margin: 26px 0 0; }
+  .row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
   .tab {
     appearance: none;
     -webkit-appearance: none;
@@ -103,12 +118,13 @@
     cursor: pointer;
     transition: background-color .15s ease, color .15s ease, border-color .15s ease;
   }
-  .tab[aria-selected="true"] {
+  .tab.is-selected {
     background: var(--ink);
     color: var(--bg);
     border-color: var(--ink);
   }
-  .tab:focus-visible, .btn:focus-visible, .chip:focus-visible {
+  .row .tab { gap: 8px; padding: 6px 8px; min-width: 0; font-size: 0.95rem; }
+  .tab:focus-visible, .btn:focus-visible, .chip:focus-visible, .close:focus-visible {
     outline: 3px solid var(--focus);
     outline-offset: 2px;
   }
@@ -122,95 +138,12 @@
     font-size: 1rem;
     line-height: 1;
   }
+  .row .badge { width: 28px; height: 28px; font-size: 0.9rem; }
   .b-email { background: #5B6B80; }
   .b-messenger { background: #0A7CFF; }
   .b-whatsapp { background: #128C4B; }
   .b-viber { background: #7360F2; }
   .b-telegram { background: #1E8FC9; }
-  /* In-app browser banner */
-  .iab {
-    background: var(--surface);
-    border: 1.5px solid var(--magenta);
-    border-radius: 14px;
-    padding: 12px 14px 10px;
-    margin-bottom: 18px;
-    font-size: 0.92rem;
-  }
-  .iab p { margin: 0 0 10px; }
-  .iab .btn { width: 100%; min-height: 44px; }
-  .iab .iab-tip { margin: 10px 0 0; color: var(--muted); font-size: 0.85rem; }
-
-  /* Email + Messenger side by side */
-  .row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-  .row .tab { gap: 8px; padding: 6px 8px; min-width: 0; font-size: 0.95rem; }
-  .row .badge { width: 28px; height: 28px; font-size: 0.9rem; }
-
-  /* Small Free WiFi button, top right */
-  .topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
-  .wifi-pill {
-    appearance: none;
-    -webkit-appearance: none;
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    min-height: 36px;
-    padding: 4px 12px;
-    background: var(--surface);
-    color: var(--ink);
-    border: 1.5px solid var(--ink);
-    border-radius: 999px;
-    font: inherit;
-    font-size: 0.85rem;
-    font-weight: 600;
-    cursor: pointer;
-  }
-  .wifi-pill:focus-visible, .close:focus-visible {
-    outline: 3px solid var(--focus);
-    outline-offset: 2px;
-  }
-
-  /* Free WiFi pop-up */
-  .overlay {
-    position: fixed;
-    inset: 0;
-    z-index: 10;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 18px;
-    background: rgba(8, 14, 26, 0.55);
-  }
-  .dialog {
-    position: relative;
-    width: 100%;
-    max-width: 400px;
-    background: var(--surface);
-    color: var(--ink);
-    border: 1.5px solid var(--line);
-    border-radius: 18px;
-    padding: 22px 18px 18px;
-  }
-  .dialog h2 {
-    margin: 0 40px 10px 0;
-    font-family: "Bricolage Grotesque", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
-    font-size: 1.25rem;
-  }
-  .dialog p { margin: 0 0 10px; }
-  .dialog .ask { font-weight: 600; margin-bottom: 16px; }
-  .dialog .btn { width: 100%; }
-  .close {
-    position: absolute;
-    top: 10px; right: 10px;
-    width: 36px; height: 36px;
-    display: grid; place-items: center;
-    background: transparent;
-    color: var(--ink);
-    border: 1.5px solid var(--line);
-    border-radius: 50%;
-    font-size: 1.3rem;
-    line-height: 1;
-    cursor: pointer;
-  }
 
   /* Bracketed group */
   .group {
@@ -246,24 +179,50 @@
   }
   .chip .hint { font-size: 0.75rem; color: var(--muted); }
 
-  /* Detail panel */
-  .panel {
+  /* Centered pop-up for the selected option */
+  .overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 18px;
+    background: rgba(8, 14, 26, 0.55);
+  }
+  .dialog {
+    position: relative;
+    width: 100%;
+    max-width: 400px;
+    max-height: 100%;
+    overflow: auto;
     background: var(--surface);
+    color: var(--ink);
     border: 1.5px solid var(--line);
     border-radius: 18px;
-    padding: 18px;
+    padding: 22px 18px 18px;
+    animation: pop .18s ease-out;
   }
-  .panel .who { display: flex; align-items: center; gap: 10px; font-weight: 600; margin-bottom: 10px; }
-  .panel .value {
+  @keyframes pop {
+    from { transform: scale(.94); opacity: 0; }
+    to { transform: none; opacity: 1; }
+  }
+  .dialog .who { display: flex; align-items: center; gap: 10px; margin: 0 44px 14px 0; }
+  .dialog h2 {
+    margin: 0;
+    font-family: "Bricolage Grotesque", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+    font-size: 1.25rem;
+  }
+  .dialog .value {
+    margin: 0 0 6px;
     font-family: "Bricolage Grotesque", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
     font-weight: 700;
-    font-size: clamp(1.35rem, 6.5vw, 1.7rem);
+    font-size: clamp(1.3rem, 6vw, 1.6rem);
     line-height: 1.2;
     word-break: break-word;
-    margin: 0 0 6px;
     font-variant-numeric: tabular-nums;
   }
-  .panel .note { margin: 0 0 16px; color: var(--muted); font-size: 0.95rem; }
+  .dialog .note { margin: 0 0 16px; color: var(--muted); font-size: 0.95rem; }
   .actions { display: flex; flex-wrap: wrap; gap: 10px; }
   .btn {
     appearance: none;
@@ -281,7 +240,19 @@
   }
   .btn.primary { background: var(--primary); color: var(--on-primary); }
   .btn.ghost { background: transparent; color: var(--ink); border-color: var(--line); }
-  [hidden] { display: none !important; }
+  .close {
+    position: absolute;
+    top: 10px; right: 10px;
+    width: 36px; height: 36px;
+    display: grid; place-items: center;
+    background: transparent;
+    color: var(--ink);
+    border: 1.5px solid var(--line);
+    border-radius: 50%;
+    font-size: 1.3rem;
+    line-height: 1;
+    cursor: pointer;
+  }
 
   .toast {
     position: fixed;
@@ -292,7 +263,10 @@
     background: var(--ink);
     color: var(--bg);
     padding: 10px 18px;
-    border-radius: 999px;
+    border-radius: 18px;
+    width: max-content;
+    max-width: calc(100vw - 36px);
+    text-align: center;
     font-weight: 600;
     opacity: 0;
     pointer-events: none;
@@ -301,7 +275,7 @@
   .toast.show { opacity: 1; transform: translate(-50%, 0); }
 
   @media (prefers-reduced-motion: reduce) {
-    * { transition: none !important; }
+    * { transition: none !important; animation: none !important; }
   }
 </style>
 </head>
@@ -312,40 +286,38 @@
     <button class="btn primary" id="iabOpen" type="button">Open in browser</button>
     <p class="iab-tip" id="iabTip"></p>
   </div>
+
   <header>
-    <div class="topbar">
     <svg class="mark" width="56" height="20" viewBox="0 0 56 20" aria-hidden="true">
       <circle cx="8" cy="10" r="7" fill="var(--cyan)"/>
       <circle cx="21" cy="10" r="7" fill="var(--magenta)" style="mix-blend-mode:multiply"/>
       <circle cx="34" cy="10" r="7" fill="var(--yellow)" style="mix-blend-mode:multiply"/>
       <circle cx="47" cy="10" r="7" fill="var(--ink)"/>
     </svg>
-    <button class="wifi-pill" id="wifiBtn" type="button" aria-haspopup="dialog" aria-expanded="false">📶 Free WiFi</button>
-    </div>
     <h1>PaPrint &amp; Copy</h1>
     <p class="en">Please select which options would you like to send your files</p>
     <p class="tl"><em lang="tl">Pumili ng paraan kung paano mag padala ng files</em></p>
   </header>
 
-  <div class="tabs" role="tablist" aria-label="Ways to send your files">
+  <div class="tabs" role="group" aria-label="Ways to send your files">
     <div class="row">
-    <button class="tab" role="tab" id="tab-email" data-key="email" aria-selected="true" aria-controls="panel">
-      <span class="badge b-email" aria-hidden="true">@</span>Email
-    </button>
-    <button class="tab" role="tab" id="tab-messenger" data-key="messenger" aria-selected="false" aria-controls="panel" tabindex="-1">
-      <span class="badge b-messenger" aria-hidden="true">M</span>Messenger
-    </button>
+      <button class="tab" type="button" data-key="email" aria-haspopup="dialog">
+        <span class="badge b-email" aria-hidden="true">@</span>Email
+      </button>
+      <button class="tab" type="button" data-key="messenger" aria-haspopup="dialog">
+        <span class="badge b-messenger" aria-hidden="true">M</span>Messenger
+      </button>
     </div>
 
     <div class="group">
       <div class="stack">
-        <button class="tab" role="tab" id="tab-whatsapp" data-key="whatsapp" aria-selected="false" aria-controls="panel" tabindex="-1">
+        <button class="tab" type="button" data-key="whatsapp" aria-haspopup="dialog">
           <span class="badge b-whatsapp" aria-hidden="true">W</span>WhatsApp
         </button>
-        <button class="tab" role="tab" id="tab-viber" data-key="viber" aria-selected="false" aria-controls="panel" tabindex="-1">
+        <button class="tab" type="button" data-key="viber" aria-haspopup="dialog">
           <span class="badge b-viber" aria-hidden="true">V</span>Viber
         </button>
-        <button class="tab" role="tab" id="tab-telegram" data-key="telegram" aria-selected="false" aria-controls="panel" tabindex="-1">
+        <button class="tab" type="button" data-key="telegram" aria-haspopup="dialog">
           <span class="badge b-telegram" aria-hidden="true">T</span>Telegram
         </button>
       </div>
@@ -359,32 +331,44 @@
       </button>
     </div>
   </div>
-
-  <section class="panel" id="panel" role="tabpanel" aria-live="polite">
-    <div class="who"><span class="badge" id="pBadge" aria-hidden="true"></span><span id="pName"></span></div>
-    <p class="value" id="pValue"></p>
-    <p class="note" id="pNote"></p>
-    <div class="actions">
-      <button class="btn primary" id="pCopy" type="button"></button>
-      <a class="btn ghost" id="pOpen" target="_blank" rel="noopener"></a>
-    </div>
-  </section>
 </main>
 
-<div class="overlay" id="wifiOverlay" hidden>
-  <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="wifiTitle">
-    <button class="close" id="wifiClose" type="button" aria-label="Close">&times;</button>
-    <h2 id="wifiTitle">📶 Free WiFi</h2>
-    <p>Mabagal po data dito sa loob. We can provide you Limited Time free connection.</p>
-    <p class="ask">Pls. connect to &quot;3M PisoWiFi&quot;. Ask counter for Voucher Code.</p>
-    <button class="btn primary" id="wifiGo" type="button">Connect to WiFi</button>
+<div class="overlay" id="overlay" hidden>
+  <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="dTitle">
+    <button class="close" id="dClose" type="button" aria-label="Close">&times;</button>
+    <div class="who"><span class="badge" id="dBadge" aria-hidden="true"></span><h2 id="dTitle"></h2></div>
+    <p class="value" id="dValue"></p>
+    <p class="note" id="dNote"></p>
+    <div class="actions">
+      <button class="btn primary" id="dCopy" type="button"></button>
+      <a class="btn ghost" id="dOpen" target="_blank" rel="noopener"></a>
+    </div>
   </div>
 </div>
 
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script>
-  // Break out of in-app browsers (Messenger, Facebook, Viber, etc.)
+  // ---------- Spoken prompts ----------
+  function speak(text, onStart) {
+    try {
+      if (!("speechSynthesis" in window)) return;
+      var synth = window.speechSynthesis;
+      if (synth.speaking || synth.pending) synth.cancel();
+      var u = new SpeechSynthesisUtterance(text);
+      u.lang = "en-US";
+      if (onStart) u.onstart = onStart;
+      synth.speak(u);
+    } catch (e) {}
+  }
+
+  var introSpoken = false;
+  function sayIntro() {
+    if (introSpoken) return;
+    speak("Please Select", function () { introSpoken = true; });
+  }
+
+  // ---------- Break out of in-app browsers (Messenger, Facebook, Viber, etc.) ----------
   (function () {
     var ua = navigator.userAgent || "";
     var isAndroid = /android/i.test(ua);
@@ -417,70 +401,48 @@
     }
   })();
 
+  // ---------- Options ----------
   var NUMBER = "09497218888";
+  var SAME = "Same number for WhatsApp, Viber and Telegram.";
   var CH = {
     email: {
       name: "Email", badge: "@", cls: "b-email", value: "paprint088@gmail.com",
       note: "Attach your files to an email and send.",
-      copy: "Copy email", open: "Open email app",
+      copy: "Copy email", copied: "Email",
+      open: "Open email app",
       href: "mailto:paprint088@gmail.com?subject=Files%20to%20print"
     },
     messenger: {
       name: "Messenger", badge: "M", cls: "b-messenger", value: "xerox at print pasay",
       note: "Opens the Facebook page. Tap Message to start chatting.",
-      copy: "Copy name", open: "Open Facebook page",
+      copy: "Copy name", copied: "Name",
+      open: "Open Facebook page",
       href: "https://www.facebook.com/xeroxprintatbp/"
     },
     whatsapp: {
       name: "WhatsApp", badge: "W", cls: "b-whatsapp", value: NUMBER,
-      note: "Same number for WhatsApp, Viber and Telegram.",
-      copy: "Copy number", open: "Open WhatsApp",
+      note: SAME, copy: "Copy number", copied: "Number",
+      open: "Open WhatsApp",
       href: "https://wa.me/639497218888"
     },
     viber: {
       name: "Viber", badge: "V", cls: "b-viber", value: NUMBER,
-      note: "Same number for WhatsApp, Viber and Telegram.",
-      copy: "Copy number", open: "Open Viber",
+      note: SAME, copy: "Copy number", copied: "Number",
+      open: "Open Viber",
       href: "viber://chat?number=%2B639497218888"
     },
     telegram: {
       name: "Telegram", badge: "T", cls: "b-telegram", value: NUMBER,
-      note: "Same number for WhatsApp, Viber and Telegram.",
-      copy: "Copy number", open: "Open Telegram",
+      note: SAME, copy: "Copy number", copied: "Number",
+      open: "Open Telegram",
       href: "https://t.me/+639497218888"
     }
   };
 
   var tabs = Array.prototype.slice.call(document.querySelectorAll(".tab"));
-  var current = "email";
-
-  function select(key, focus) {
-    var c = CH[key];
-    current = key;
-    tabs.forEach(function (t) {
-      var on = t.getAttribute("data-key") === key;
-      t.setAttribute("aria-selected", on ? "true" : "false");
-      t.tabIndex = on ? 0 : -1;
-      if (on && focus) t.focus();
-    });
-    var badge = document.getElementById("pBadge");
-    badge.className = "badge " + c.cls;
-    badge.textContent = c.badge;
-    document.getElementById("pName").textContent = c.name;
-    document.getElementById("pValue").textContent = c.display || c.value;
-    document.getElementById("pNote").textContent = c.note;
-    document.getElementById("pCopy").textContent = c.copy;
-    var open = document.getElementById("pOpen");
-    if (c.href) {
-      open.hidden = false;
-      open.textContent = c.open;
-      open.setAttribute("href", c.href);
-    } else {
-      open.hidden = true;
-      open.removeAttribute("href");
-    }
-    document.getElementById("panel").setAttribute("aria-labelledby", "tab-" + key);
-  }
+  var overlay = document.getElementById("overlay");
+  var current = null;
+  var lastTab = null;
 
   function toast(msg) {
     var el = document.getElementById("toast");
@@ -515,57 +477,66 @@
     }
   }
 
+  function openDialog(key, tabEl) {
+    var c = CH[key];
+    current = key;
+    lastTab = tabEl;
+    tabs.forEach(function (t) {
+      t.classList.toggle("is-selected", t.getAttribute("data-key") === key);
+    });
+    var badge = document.getElementById("dBadge");
+    badge.className = "badge " + c.cls;
+    badge.textContent = c.badge;
+    document.getElementById("dTitle").textContent = c.name;
+    document.getElementById("dValue").textContent = c.value;
+    document.getElementById("dNote").textContent = c.note;
+    document.getElementById("dCopy").textContent = c.copy;
+    var open = document.getElementById("dOpen");
+    open.textContent = c.open;
+    open.setAttribute("href", c.href);
+    overlay.hidden = false;
+    document.getElementById("dCopy").focus();
+  }
+
+  function closeDialog() {
+    overlay.hidden = true;
+    tabs.forEach(function (t) { t.classList.remove("is-selected"); });
+    if (lastTab) lastTab.focus();
+  }
+
   tabs.forEach(function (t) {
-    t.addEventListener("click", function () { select(t.getAttribute("data-key"), false); });
-    t.addEventListener("keydown", function (e) {
-      var i = tabs.indexOf(t), n = tabs.length, next = null;
-      if (e.key === "ArrowDown" || e.key === "ArrowRight") next = (i + 1) % n;
-      else if (e.key === "ArrowUp" || e.key === "ArrowLeft") next = (i - 1 + n) % n;
-      else if (e.key === "Home") next = 0;
-      else if (e.key === "End") next = n - 1;
-      if (next !== null) {
-        e.preventDefault();
-        select(tabs[next].getAttribute("data-key"), true);
-      }
+    t.addEventListener("click", function () {
+      var key = t.getAttribute("data-key");
+      speak(CH[key].name + " is Selected");
+      openDialog(key, t);
     });
   });
 
-  document.getElementById("pCopy").addEventListener("click", function () {
+  document.getElementById("dClose").addEventListener("click", closeDialog);
+  overlay.addEventListener("click", function (e) { if (e.target === overlay) closeDialog(); });
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape" && !overlay.hidden) closeDialog();
+  });
+
+  document.getElementById("dCopy").addEventListener("click", function () {
     var c = CH[current];
-    copyText(c.value, current === "email" ? "Email" : current === "messenger" ? "Name" : "Number");
+    copyText(c.value, c.copied);
   });
   document.getElementById("chip").addEventListener("click", function () {
     copyText(NUMBER, "Number");
   });
 
-  // Free WiFi pop-up
-  var overlay = document.getElementById("wifiOverlay");
-  var wifiBtn = document.getElementById("wifiBtn");
-  function openWifi() {
-    overlay.hidden = false;
-    wifiBtn.setAttribute("aria-expanded", "true");
-    document.getElementById("wifiGo").focus();
-  }
-  function closeWifi() {
-    overlay.hidden = true;
-    wifiBtn.setAttribute("aria-expanded", "false");
-    wifiBtn.focus();
-  }
-  wifiBtn.addEventListener("click", openWifi);
-  document.getElementById("wifiClose").addEventListener("click", closeWifi);
-  overlay.addEventListener("click", function (e) { if (e.target === overlay) closeWifi(); });
-  document.addEventListener("keydown", function (e) {
-    if (e.key === "Escape" && !overlay.hidden) closeWifi();
-  });
-  document.getElementById("wifiGo").addEventListener("click", function () {
-    if (/android/i.test(navigator.userAgent)) {
-      window.location.href = "intent:#Intent;action=android.settings.WIFI_SETTINGS;end";
-    } else {
-      toast("Open Settings \u203A Wi-Fi and choose 3M PisoWiFi");
-    }
-  });
-
-  select("email", false);
+  // ---------- "Please Select" when the page opens ----------
+  // Phones usually block sound until the first touch. If the automatic try
+  // is blocked, say it on the first tap (unless that tap is on an option,
+  // which announces itself).
+  window.addEventListener("load", function () { setTimeout(sayIntro, 300); });
+  document.addEventListener("pointerdown", function firstTap(e) {
+    document.removeEventListener("pointerdown", firstTap, true);
+    if (introSpoken) return;
+    if (e.target && e.target.closest && e.target.closest(".tab")) return;
+    sayIntro();
+  }, true);
 </script>
 </body>
 </html>
