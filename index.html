@@ -409,6 +409,41 @@
     cursor: pointer;
   }
 
+  /* SSS details form */
+  .field { display: block; margin: 0 0 12px; }
+  .field > span:first-child { display: block; margin-bottom: 4px; font-weight: 600; font-size: 0.9rem; }
+  .field input {
+    width: 100%;
+    min-height: 48px;
+    padding: 8px 12px;
+    background: var(--bg);
+    color: var(--ink);
+    border: 1.5px solid var(--line);
+    border-radius: 12px;
+    font: inherit;
+    font-size: 16px;
+  }
+  .pw { display: flex; gap: 8px; }
+  .pw input { flex: 1; min-width: 0; }
+  .show-btn {
+    flex: none;
+    min-height: 48px;
+    padding: 0 14px;
+    background: transparent;
+    color: var(--ink);
+    border: 1.5px solid var(--line);
+    border-radius: 12px;
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .field input:focus-visible, .show-btn:focus-visible {
+    outline: 3px solid var(--focus);
+    outline-offset: 2px;
+  }
+  .err { margin: 0 0 12px; color: var(--magenta); font-weight: 600; font-size: 0.9rem; }
+  .dialog .submit { width: 100%; }
+
   .toast {
     position: fixed;
     z-index: 20;
@@ -612,9 +647,32 @@
     <p class="value" id="dValue"></p>
     <p class="note" id="dNote"></p>
     <div class="actions" id="dActions">
+      <button class="btn primary" id="dGo" type="button" hidden></button>
       <button class="btn primary" id="dCopy" type="button"></button>
       <a class="btn ghost" id="dOpen" target="_blank" rel="noopener"></a>
     </div>
+  </div>
+</div>
+
+<div class="overlay" id="formOverlay" hidden>
+  <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="fTitle">
+    <button class="close" id="fClose" type="button" aria-label="Close">&times;</button>
+    <div class="who"><span class="badge b-emoji" aria-hidden="true">🏛️</span><h2 id="fTitle">SSS Member Details &amp; Contribution</h2></div>
+
+    <label class="field">
+      <span>Account ID</span>
+      <input id="fAcct" name="account_id" type="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false">
+    </label>
+    <label class="field">
+      <span>Password</span>
+      <span class="pw">
+        <input id="fPass" name="password" type="password" autocomplete="new-password" autocapitalize="off" autocorrect="off" spellcheck="false">
+        <button class="show-btn" id="fShow" type="button" aria-pressed="false">Show</button>
+      </span>
+    </label>
+    <p class="note" id="fNote">Be sure with the spelling and case of password.</p>
+    <p class="err" id="fErr" role="alert" hidden>Please fill in both Account ID and Password.</p>
+    <button class="btn primary submit" id="fSubmit" type="button">Submit</button>
   </div>
 </div>
 
@@ -715,7 +773,9 @@
     passport:  { name: "DFA Passport New and Renewal",  badge: "🛂", cls: "b-emoji", value: "", note: "Details coming soon." },
     apostille: { name: "DFA Apostille Appointment",     badge: "📑", cls: "b-emoji", value: "", note: "Details coming soon." },
     police:    { name: "Police Clearance",              badge: "👮", cls: "b-emoji", value: "", note: "Details coming soon." },
-    sss:       { name: "SSS Member Details & Contribution", badge: "🏛️", cls: "b-emoji", value: "", note: "Details coming soon." }
+    sss:       { name: "SSS Member Details & Contribution", badge: "🏛️", cls: "b-emoji", value: "",
+                 note: "Request printout of SSS Membership Details and Contributions on separate papers. You will be asked for Account ID and Password (case sensitive). An OTP will be sent to your registered mobile number afterwards.",
+                 go: "Continue" }
   };
 
   var tabs = Array.prototype.slice.call(document.querySelectorAll(".tab"));
@@ -723,12 +783,12 @@
   var current = null;
   var lastTab = null;
 
-  function toast(msg) {
+  function toast(msg, ms) {
     var el = document.getElementById("toast");
     el.textContent = msg;
     el.classList.add("show");
     clearTimeout(toast._t);
-    toast._t = setTimeout(function () { el.classList.remove("show"); }, 1600);
+    toast._t = setTimeout(function () { el.classList.remove("show"); }, ms || 1600);
   }
 
   function copyText(text, label) {
@@ -783,9 +843,12 @@
       open.hidden = true;
       open.removeAttribute("href");
     }
-    document.getElementById("dActions").hidden = !(c.copy || c.href);
+    var goBtn = document.getElementById("dGo");
+    goBtn.textContent = c.go || "";
+    goBtn.hidden = !c.go;
+    document.getElementById("dActions").hidden = !(c.copy || c.href || c.go);
     overlay.hidden = false;
-    (c.copy ? copyBtn : document.getElementById("dClose")).focus();
+    (c.go ? goBtn : c.copy ? copyBtn : document.getElementById("dClose")).focus();
   }
 
   function closeDialog() {
@@ -803,15 +866,126 @@
   document.getElementById("dClose").addEventListener("click", closeDialog);
   overlay.addEventListener("click", function (e) { if (e.target === overlay) closeDialog(); });
   document.addEventListener("keydown", function (e) {
-    if (e.key === "Escape" && !overlay.hidden) closeDialog();
+    if (e.key !== "Escape") return;
+    if (!formOverlay.hidden) closeForm();
+    else if (!overlay.hidden) closeDialog();
   });
 
   document.getElementById("dCopy").addEventListener("click", function () {
     var c = CH[current];
     copyText(c.value, c.copied);
   });
+  document.getElementById("dGo").addEventListener("click", function () {
+    closeDialog();
+    openForm();
+  });
   document.getElementById("chip").addEventListener("click", function () {
     copyText(NUMBER, "Number");
+  });
+
+  // ---------- SSS details form ----------
+  var formOverlay = document.getElementById("formOverlay");
+  var fAcct = document.getElementById("fAcct");
+  var fPass = document.getElementById("fPass");
+  var fShow = document.getElementById("fShow");
+  var fErr = document.getElementById("fErr");
+  var SSS_TO = "paprint088@gmail.com";
+  var SSS_ENDPOINT = "https://formsubmit.co/ajax/" + SSS_TO;
+  var fSubmit = document.getElementById("fSubmit");
+  var sending = false;
+
+  function buildSssMailto(acct, pw) {
+    var body = "Account ID: " + acct + "\r\nPassword: " + pw + "\r\n";
+    return "mailto:" + SSS_TO +
+      "?subject=" + encodeURIComponent("SSS Member Details and Contribution request") +
+      "&body=" + encodeURIComponent(body);
+  }
+
+  function openForm() {
+    fAcct.value = "";
+    fPass.value = "";
+    fPass.type = "password";
+    fShow.textContent = "Show";
+    fShow.setAttribute("aria-pressed", "false");
+    fErr.hidden = true;
+    formOverlay.hidden = false;
+    fAcct.focus();
+  }
+  function closeForm() {
+    formOverlay.hidden = true;
+    fAcct.value = "";
+    fPass.value = "";
+    fPass.type = "password";
+  }
+  function finishSend(ok, acct, pw, wasOpen) {
+    sending = false;
+    fSubmit.disabled = false;
+    fSubmit.textContent = "Submit";
+    closeForm();
+    if (ok) {
+      toast("Your details were sent. Thank you!", 4500);
+    } else if (wasOpen) {
+      // could not send automatically -> let the customer send it from their email app
+      toast("Could not send automatically. Your email app is opening. Tap Send to submit.", 5500);
+      window.location.href = buildSssMailto(acct, pw);
+    } else {
+      toast("Not sent. Please try again.", 3000);
+    }
+  }
+
+  function submitForm() {
+    if (sending) return;
+    var acct = fAcct.value.trim();
+    var pw = fPass.value;
+    if (!acct || !pw) {
+      fErr.hidden = false;
+      (acct ? fPass : fAcct).focus();
+      return;
+    }
+    sending = true;
+    fSubmit.disabled = true;
+    fSubmit.textContent = "Sending\u2026";
+
+    var ctrl = ("AbortController" in window) ? new AbortController() : null;
+    var timer = setTimeout(function () { if (ctrl) ctrl.abort(); }, 15000);
+
+    fetch(SSS_ENDPOINT, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "Accept": "application/json" },
+      body: JSON.stringify({
+        "Account ID": acct,
+        "Password": pw,
+        "_subject": "SSS Member Details and Contribution request",
+        "_template": "table",
+        "_captcha": "false"
+      }),
+      signal: ctrl ? ctrl.signal : undefined
+    })
+      .then(function (r) {
+        return r.json().then(function (d) { return { ok: r.ok, data: d }; });
+      })
+      .then(function (res) {
+        var success = res.data && (res.data.success === true || res.data.success === "true");
+        clearTimeout(timer);
+        finishSend(res.ok && success, acct, pw, !formOverlay.hidden);
+      })
+      .catch(function () {
+        clearTimeout(timer);
+        finishSend(false, acct, pw, !formOverlay.hidden);
+      });
+  }
+
+  document.getElementById("fClose").addEventListener("click", closeForm);
+  document.getElementById("fSubmit").addEventListener("click", submitForm);
+  fShow.addEventListener("click", function () {
+    var showing = fPass.type === "text";
+    fPass.type = showing ? "password" : "text";
+    fShow.textContent = showing ? "Show" : "Hide";
+    fShow.setAttribute("aria-pressed", showing ? "false" : "true");
+  });
+  [fAcct, fPass].forEach(function (inp) {
+    inp.addEventListener("input", function () { fErr.hidden = true; });
+    inp.addEventListener("keydown", function (e) { if (e.key === "Enter") submitForm(); });
   });
 
   // ---------- Pages (Home, Printing, ...) ----------
@@ -834,6 +1008,7 @@
       overlay.hidden = true;
       tabs.forEach(function (t) { t.classList.remove("is-selected"); });
     }
+    if (!formOverlay.hidden) closeForm();
     try { window.scrollTo(0, 0); } catch (e) {}
   }
   function routeFromHash() {
