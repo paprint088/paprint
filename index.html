@@ -297,6 +297,8 @@
   .b-whatsapp { background: #128C4B; }
   .b-viber { background: #7360F2; }
   .b-telegram { background: #1E8FC9; }
+  .b-emoji { background: var(--bg); border: 1.5px solid var(--line); font-size: 1.05rem; }
+  .tabs.list { margin-top: 6px; }
 
   /* Bracketed group */
   .group {
@@ -530,7 +532,30 @@
       <h2 class="page-title">Online Assistance</h2>
       <button class="back" type="button" data-go="home"><span aria-hidden="true">‹</span> Home</button>
     </div>
-    <p class="soon">Coming soon.</p>
+
+    <div class="tabs list" role="group" aria-label="Online services">
+      <button class="tab" type="button" data-key="nbi" data-say="NBI Online Appointment" aria-haspopup="dialog">
+        <span class="badge b-emoji" aria-hidden="true">🪪</span>NBI Online Appointment
+      </button>
+      <button class="tab" type="button" data-key="dmw" data-say="DMW e-Reg and P.E.O.S" aria-haspopup="dialog">
+        <span class="badge b-emoji" aria-hidden="true">✈️</span>DMW eReg and PEOS
+      </button>
+      <button class="tab" type="button" data-key="psa" data-say="PSA Appointment" aria-haspopup="dialog">
+        <span class="badge b-emoji" aria-hidden="true">📜</span>PSA Appointment
+      </button>
+      <button class="tab" type="button" data-key="passport" data-say="DFA Passport New and Renewal" aria-haspopup="dialog">
+        <span class="badge b-emoji" aria-hidden="true">🛂</span>DFA Passport New and Renewal
+      </button>
+      <button class="tab" type="button" data-key="apostille" data-say="DFA Apostille Appointment" aria-haspopup="dialog">
+        <span class="badge b-emoji" aria-hidden="true">📑</span>DFA Apostille Appointment
+      </button>
+      <button class="tab" type="button" data-key="police" data-say="Police Clearance" aria-haspopup="dialog">
+        <span class="badge b-emoji" aria-hidden="true">👮</span>Police Clearance
+      </button>
+      <button class="tab" type="button" data-key="sss" data-say="SSS Member Details and Contribution" aria-haspopup="dialog">
+        <span class="badge b-emoji" aria-hidden="true">🏛️</span>SSS Member Details &amp; Contribution
+      </button>
+    </div>
   </section>
 
   <!-- DOCUMENT SERVICES (placeholder) -->
@@ -586,7 +611,7 @@
     <div class="who"><span class="badge" id="dBadge" aria-hidden="true"></span><h2 id="dTitle"></h2></div>
     <p class="value" id="dValue"></p>
     <p class="note" id="dNote"></p>
-    <div class="actions">
+    <div class="actions" id="dActions">
       <button class="btn primary" id="dCopy" type="button"></button>
       <a class="btn ghost" id="dOpen" target="_blank" rel="noopener"></a>
     </div>
@@ -683,7 +708,14 @@
       note: SAME, copy: "Copy number", copied: "Number",
       open: "Open Telegram",
       href: "https://t.me/+639497218888"
-    }
+    },
+    nbi:       { name: "NBI Online Appointment",        badge: "🪪", cls: "b-emoji", value: "", note: "Details coming soon." },
+    dmw:       { name: "DMW eReg and PEOS",             badge: "✈️", cls: "b-emoji", value: "", note: "Details coming soon." },
+    psa:       { name: "PSA Appointment",               badge: "📜", cls: "b-emoji", value: "", note: "Details coming soon." },
+    passport:  { name: "DFA Passport New and Renewal",  badge: "🛂", cls: "b-emoji", value: "", note: "Details coming soon." },
+    apostille: { name: "DFA Apostille Appointment",     badge: "📑", cls: "b-emoji", value: "", note: "Details coming soon." },
+    police:    { name: "Police Clearance",              badge: "👮", cls: "b-emoji", value: "", note: "Details coming soon." },
+    sss:       { name: "SSS Member Details & Contribution", badge: "🏛️", cls: "b-emoji", value: "", note: "Details coming soon." }
   };
 
   var tabs = Array.prototype.slice.call(document.querySelectorAll(".tab"));
@@ -735,14 +767,25 @@
     badge.className = "badge " + c.cls;
     badge.textContent = c.badge;
     document.getElementById("dTitle").textContent = c.name;
-    document.getElementById("dValue").textContent = c.value;
+    var val = document.getElementById("dValue");
+    val.textContent = c.value || "";
+    val.hidden = !c.value;
     document.getElementById("dNote").textContent = c.note;
-    document.getElementById("dCopy").textContent = c.copy;
+    var copyBtn = document.getElementById("dCopy");
+    copyBtn.textContent = c.copy || "";
+    copyBtn.hidden = !c.copy;
     var open = document.getElementById("dOpen");
-    open.textContent = c.open;
-    open.setAttribute("href", c.href);
+    if (c.href) {
+      open.textContent = c.open;
+      open.setAttribute("href", c.href);
+      open.hidden = false;
+    } else {
+      open.hidden = true;
+      open.removeAttribute("href");
+    }
+    document.getElementById("dActions").hidden = !(c.copy || c.href);
     overlay.hidden = false;
-    document.getElementById("dCopy").focus();
+    (c.copy ? copyBtn : document.getElementById("dClose")).focus();
   }
 
   function closeDialog() {
