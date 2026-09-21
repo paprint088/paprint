@@ -150,10 +150,20 @@
   }
   .foot .copy { display: flex; align-items: center; justify-content: center; gap: 8px; }
   .foot svg { flex: none; }
+  .legal-row { display: flex; align-items: center; justify-content: center; gap: 4px; }
+  .legal-sep { opacity: 0.6; }
   .legal {
     color: inherit;
     text-decoration: none;
     padding: 6px 8px;
+  }
+  button.legal {
+    appearance: none;
+    -webkit-appearance: none;
+    background: none;
+    border: 0;
+    font: inherit;
+    cursor: pointer;
   }
   .legal:focus-visible {
     outline: 3px solid var(--focus);
@@ -412,7 +422,7 @@
   /* SSS details form */
   .field { display: block; margin: 0 0 12px; }
   .field > span:first-child { display: block; margin-bottom: 4px; font-weight: 600; font-size: 0.9rem; }
-  .field input:not([type="radio"]), .field select {
+  .field input:not([type="radio"]), .field select, .field textarea {
     width: 100%;
     min-height: 48px;
     padding: 8px 12px;
@@ -437,7 +447,7 @@
     font-weight: 600;
     cursor: pointer;
   }
-  .field input:focus-visible, .field select:focus-visible, .show-btn:focus-visible, .choice input:focus-visible {
+  .field input:focus-visible, .field select:focus-visible, .field textarea:focus-visible, .show-btn:focus-visible, .choice input:focus-visible {
     outline: 3px solid var(--focus);
     outline-offset: 2px;
   }
@@ -474,7 +484,13 @@
   }
   .choice input { width: 18px; height: 18px; margin: 0; accent-color: var(--primary); }
   .choice:has(input:checked) { border-color: var(--ink); }
-  .field input[aria-invalid="true"], .field select[aria-invalid="true"], .field.invalid .choice { border-color: var(--magenta); }
+  .field input[aria-invalid="true"], .field select[aria-invalid="true"], .field textarea[aria-invalid="true"], .field.invalid .choice { border-color: var(--magenta); }
+  .field textarea { min-height: 110px; resize: vertical; line-height: 1.4; }
+
+  /* Contact pop-up: buttons under "Send to Email" (not pinned) */
+  .sticky-foot.static { position: static; margin: 0; padding: 4px 0 0; border-top: 0; background: transparent; }
+  .req-links { display: flex; flex-direction: column; gap: 10px; margin-top: 10px; }
+  .req-links .btn { flex: none; width: 100%; }
 
   .toast {
     position: fixed;
@@ -659,7 +675,11 @@
   </section>
 
   <footer class="foot" id="siteFoot">
-    <a class="legal" href="#privacy" data-go="privacy">Data Privacy Act of 2012</a>
+    <div class="legal-row">
+      <button class="legal" id="contactLink" type="button" aria-haspopup="dialog">CONTACT US</button>
+      <span class="legal-sep" aria-hidden="true">|</span>
+      <a class="legal" href="#privacy" data-go="privacy">Data Privacy Act of 2012</a>
+    </div>
     <div class="copy">
       <svg width="40" height="14" viewBox="0 0 56 20" aria-hidden="true">
         <circle cx="8" cy="10" r="7" fill="var(--cyan)"/>
@@ -721,10 +741,11 @@
     <button class="close" id="rClose" type="button" aria-label="Close">&times;</button>
     <div class="who"><span class="badge b-emoji" id="rBadge" aria-hidden="true"></span><h2 id="rTitle"></h2></div>
     <div id="rFields"></div>
-    <div class="sticky-foot">
+    <div class="sticky-foot" id="rFoot">
       <p class="note" id="rNote"></p>
       <p class="err" id="rErr" role="alert" hidden></p>
       <button class="btn primary submit" id="rSubmit" type="button">Submit</button>
+      <div class="req-links" id="rLinks" hidden></div>
     </div>
   </div>
 </div>
@@ -1064,6 +1085,7 @@
     nbiNew: {
       title: "New Clearance Certificate", badge: "\uD83C\uDD95",
       subject: "NBI New Clearance Certificate request",
+      note: REQ_NOTE,
       fields: [
         { name: "Last Name", type: "text", cap: "words" },
         { name: "First Name", type: "text", cap: "words" },
@@ -1078,6 +1100,7 @@
     nbiRenew: {
       title: "Renew Clearance", badge: "\uD83D\uDD01",
       subject: "NBI Renew Clearance request",
+      note: REQ_NOTE,
       fields: [
         { name: "Last Name", type: "text", cap: "words" },
         { name: "First Name", type: "text", cap: "words" },
@@ -1085,6 +1108,23 @@
         { name: "NBI ID Number", type: "text", cap: "off" },
         { name: "Mobile Number", type: "tel" },
         { name: "Active Email Address", type: "email" }
+      ]
+    },
+    contact: {
+      title: "Contact Us", badge: "\u2709\uFE0F",
+      subject: "Contact Us", subjectFrom: "Subject",   // email subject = "Contact Us: <their subject>"
+      submit: "Send to Email",
+      sent: "Your message was sent. Thank you!",
+      sticky: false,
+      fields: [
+        { name: "Name", type: "text", cap: "words" },
+        { name: "Mobile Number", type: "tel" },
+        { name: "Subject", type: "text", cap: "sentences" },
+        { name: "Message", type: "textarea" }
+      ],
+      links: [
+        { label: "Contact tru Messenger", href: "https://www.facebook.com/xeroxprintatbp/" },
+        { label: "Message our Viber", href: "viber://chat?number=%2B639497218888" }
       ]
     }
   };
@@ -1106,6 +1146,10 @@
              '<span>' + label + '</span><span class="choices">' + radios + '</span></div>';
     }
     var attrs = 'type="text" autocapitalize="' + (f.cap || "off") + '"';
+    if (f.type === "textarea") {
+      return '<label class="field"><span>' + label + '</span>' +
+             '<textarea rows="4" data-i="' + i + '" autocomplete="off" autocapitalize="sentences" spellcheck="true"></textarea></label>';
+    }
     if (f.type === "select") {
       var opts = '<option value="" selected disabled>Select</option>' + f.options.map(function (o) {
         return '<option value="' + o + '">' + o + '</option>';
@@ -1125,7 +1169,21 @@
     document.getElementById("rBadge").textContent = cfg.badge;
     document.getElementById("rTitle").textContent = cfg.title;
     rFields.innerHTML = cfg.fields.map(fieldHtml).join("");
-    document.getElementById("rNote").textContent = REQ_NOTE;
+    var noteEl = document.getElementById("rNote");
+    noteEl.textContent = cfg.note || "";
+    noteEl.hidden = !cfg.note;
+    rSubmit.textContent = cfg.submit || "Submit";
+    var links = document.getElementById("rLinks");
+    if (cfg.links) {
+      links.innerHTML = cfg.links.map(function (l) {
+        return '<a class="btn ghost" href="' + l.href + '" target="_blank" rel="noopener">' + l.label + '</a>';
+      }).join("");
+      links.hidden = false;
+    } else {
+      links.innerHTML = "";
+      links.hidden = true;
+    }
+    document.getElementById("rFoot").classList.toggle("static", cfg.sticky === false);
     rErr.hidden = true;
     reqOverlay.hidden = false;
     var first = rFields.querySelector("input");
@@ -1155,7 +1213,7 @@
         v = checked ? checked.value : "";
         if (!v) return { error: "Please select " + f.name + ".", el: el, group: true };
       } else {
-        el = rFields.querySelector('input[data-i="' + i + '"], select[data-i="' + i + '"]');
+        el = rFields.querySelector('input[data-i="' + i + '"], select[data-i="' + i + '"], textarea[data-i="' + i + '"]');
         v = el.value.trim();
         if (!v && !f.optional) return { error: (f.type === "select" ? "Please select " : "Please fill in ") + f.name + ".", el: el };
         if (v && f.type === "date" && !validDate(v)) return { error: "Please enter Birthday as YYYY-MM-DD.", el: el };
@@ -1173,16 +1231,16 @@
     Array.prototype.forEach.call(rFields.querySelectorAll(".invalid"), function (n) { n.classList.remove("invalid"); });
   }
 
-  function finishReq(ok, cfg, pairs, wasOpen) {
+  function finishReq(ok, cfg, pairs, wasOpen, subj) {
     reqSending = false;
     rSubmit.disabled = false;
-    rSubmit.textContent = "Submit";
+    rSubmit.textContent = cfg.submit || "Submit";
     closeReq();
     if (ok) {
-      toast("Your details were sent. Thank you!", 4500);
+      toast(cfg.sent || "Your details were sent. Thank you!", 4500);
     } else if (wasOpen) {
       toast("Could not send automatically. Your email app is opening. Tap Send to submit.", 5500);
-      window.location.href = buildMailto(cfg.subject, pairs);
+      window.location.href = buildMailto(subj || cfg.subject, pairs);
     } else {
       toast("Not sent. Please try again.", 3000);
     }
@@ -1203,8 +1261,12 @@
     reqSending = true;
     rSubmit.disabled = true;
     rSubmit.textContent = "Sending\u2026";
-    postToForm(cfg.subject, res.pairs)
-      .then(function (ok) { finishReq(ok, cfg, res.pairs, !reqOverlay.hidden); });
+    var subj = cfg.subject;
+    if (cfg.subjectFrom) {
+      res.pairs.forEach(function (p) { if (p[0] === cfg.subjectFrom) subj = cfg.subject + ": " + p[1]; });
+    }
+    postToForm(subj, res.pairs)
+      .then(function (ok) { finishReq(ok, cfg, res.pairs, !reqOverlay.hidden, subj); });
   }
 
   // Birthday: type digits, hyphens are added for you
@@ -1225,6 +1287,11 @@
   });
   document.getElementById("rClose").addEventListener("click", closeReq);
   rSubmit.addEventListener("click", submitReq);
+
+  // CONTACT US in the footer
+  document.getElementById("contactLink").addEventListener("click", function () {
+    openReq("contact");
+  });
 
   // New Clearance Certificate / Renew Clearance buttons inside the NBI pop-up
   Array.prototype.forEach.call(document.querySelectorAll(".opt"), function (el) {
