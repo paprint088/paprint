@@ -1133,6 +1133,25 @@
   var REQ_NOTE = "Please check spelling before you submit.";
   var DMW_NOTE = "Please check details before you submit.";
 
+  // Tidies what the customer typed before it is sent
+  //   proper -> "juan DELA cruz" becomes "Juan Dela Cruz" (also after hyphens, apostrophes and dots)
+  //   suffix -> "iii" becomes "III", "jr" becomes "Jr"
+  //   upper  -> "p 1234567 a" becomes "P1234567A"
+  function toProper(str) {
+    return str.trim().replace(/\s+/g, " ").toLowerCase()
+      .replace(/(^|[\s\-'\u2019.])([^\s\-'\u2019.])/g, function (m, sep, ch) { return sep + ch.toUpperCase(); });
+  }
+  function applyFmt(fmt, str) {
+    if (fmt === "upper") return str.replace(/\s+/g, "").toUpperCase();
+    if (fmt === "suffix") {
+      var t = str.trim().replace(/\s+/g, " ");
+      if (/^(i{1,3}|iv|vi{0,3}|ix|x)$/i.test(t.replace(/\.$/, ""))) return t.replace(/\.$/, "").toUpperCase();
+      return toProper(t);
+    }
+    if (fmt === "proper") return toProper(str);
+    return str;
+  }
+
   // Birthday typed as "Jan 15, 1990" (also accepts "january 15 1990"); returns "Jan 15, 1990" or null
   var MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
   function normMDY(s) {
@@ -1153,9 +1172,9 @@
       subject: "NBI New Clearance Certificate request",
       note: REQ_NOTE,
       fields: [
-        { name: "Last Name", type: "text", cap: "words" },
-        { name: "First Name", type: "text", cap: "words" },
-        { name: "Middle Name", type: "text", cap: "words", optional: true },
+        { name: "Last Name", type: "text", cap: "words", fmt: "proper" },
+        { name: "First Name", type: "text", cap: "words", fmt: "proper" },
+        { name: "Middle Name", type: "text", cap: "words", optional: true, fmt: "proper" },
         { name: "Birthday", label: "Birthday (YYYY-MM-DD)", type: "date" },
         { name: "Gender", type: "choice", options: ["Male", "Female"] },
         { name: "Civil Status", type: "select", options: ["Single", "Married", "Widow", "Annulled", "Divorced"] },
@@ -1168,8 +1187,8 @@
       subject: "NBI Renew Clearance request",
       note: REQ_NOTE,
       fields: [
-        { name: "Last Name", type: "text", cap: "words" },
-        { name: "First Name", type: "text", cap: "words" },
+        { name: "Last Name", type: "text", cap: "words", fmt: "proper" },
+        { name: "First Name", type: "text", cap: "words", fmt: "proper" },
         { name: "Birthday", label: "Birthday (YYYY-MM-DD)", type: "date" },
         { name: "NBI ID Number", type: "text", cap: "off" },
         { name: "Mobile Number", type: "tel" },
@@ -1181,19 +1200,19 @@
       subject: "DMW eReg and PEOS New Signup request",
       note: DMW_NOTE,
       fields: [
-        { name: "First Name", type: "text", cap: "words" },
-        { name: "Middle Name", type: "text", cap: "words", optional: true },
-        { name: "Last Name", type: "text", cap: "words" },
-        { name: "Suffix", type: "text", cap: "words", optional: true },
+        { name: "First Name", type: "text", cap: "words", fmt: "proper" },
+        { name: "Middle Name", type: "text", cap: "words", optional: true, fmt: "proper" },
+        { name: "Last Name", type: "text", cap: "words", fmt: "proper" },
+        { name: "Suffix", type: "text", cap: "words", optional: true, fmt: "suffix" },
         { name: "Gender", type: "choice", options: ["Male", "Female"] },
         { name: "Active Email Address", type: "email" },
         { name: "Birthday", label: "Birthday (Mmm dd, yyyy)", type: "dateMDY" },
-        { name: "Religion", type: "text", cap: "words" },
+        { name: "Religion", type: "text", cap: "words", fmt: "proper" },
         { name: "Weight (kg)", type: "number", min: 10, max: 500 },
         { name: "Height (cm)", type: "number", min: 30, max: 260 },
         { name: "Civil Status", type: "select", options: ["Single", "Married", "Widow", "Annulled", "Divorced"] },
         { name: "Mobile Number", type: "tel" },
-        { name: "Passport No.", type: "text", cap: "characters" },
+        { name: "Passport No.", type: "text", cap: "characters", fmt: "upper" },
         { name: "Pag-IBIG No.", type: "text", cap: "off" },
         { name: "ID Picture", type: "photo" },
         { name: "Passport Image", type: "photo" }
@@ -1204,10 +1223,10 @@
       subject: "DMW eReg and PEOS Recovery or Update request",
       note: DMW_NOTE,
       fields: [
-        { name: "First Name", type: "text", cap: "words" },
-        { name: "Middle Name", type: "text", cap: "words", optional: true },
-        { name: "Last Name", type: "text", cap: "words" },
-        { name: "Suffix", type: "text", cap: "words", optional: true },
+        { name: "First Name", type: "text", cap: "words", fmt: "proper" },
+        { name: "Middle Name", type: "text", cap: "words", optional: true, fmt: "proper" },
+        { name: "Last Name", type: "text", cap: "words", fmt: "proper" },
+        { name: "Suffix", type: "text", cap: "words", optional: true, fmt: "suffix" },
         { name: "Gender", type: "choice", options: ["Male", "Female"] },
         { name: "Active Email Address", type: "email" },
         { name: "Birthday", label: "Birthday (Mmm dd, yyyy)", type: "dateMDY" },
@@ -1222,7 +1241,7 @@
       sent: "Your message was sent. Thank you!",
       sticky: false,
       fields: [
-        { name: "Name", type: "text", cap: "words" },
+        { name: "Name", type: "text", cap: "words", fmt: "proper" },
         { name: "Mobile Number", type: "tel" },
         { name: "Subject", type: "text", cap: "sentences" },
         { name: "Message", type: "textarea" }
@@ -1336,7 +1355,7 @@
     if (f.type === "dateMDY") attrs = 'type="text" placeholder="Mmm dd, yyyy" maxlength="18" autocapitalize="words"';
     if (f.type === "number")  attrs = 'type="text" inputmode="decimal" autocapitalize="off"';
     return '<label class="field"><span>' + label + '</span>' +
-           '<input ' + attrs + ' data-i="' + i + '" autocomplete="off" autocorrect="off" spellcheck="false"></label>';
+           '<input ' + attrs + (f.fmt ? ' data-fmt="' + f.fmt + '"' : '') + ' data-i="' + i + '" autocomplete="off" autocorrect="off" spellcheck="false"></label>';
   }
 
   function openReq(key) {
@@ -1410,6 +1429,7 @@
           if (!nd) return { error: "Please enter Birthday as Mmm dd, yyyy (example: Jan 15, 1990).", el: el };
           v = nd;
         }
+        if (v && f.fmt) v = applyFmt(f.fmt, v);
         if (v && f.type === "number") {
           var num = parseFloat(v.replace(",", "."));
           if (!(num >= f.min && num <= f.max) || !/^\d+([.,]\d+)?$/.test(v)) return { error: "Please enter a valid " + nm + ".", el: el };
@@ -1514,6 +1534,10 @@
   rFields.addEventListener("change", function (e) {
     if (e.target && e.target.type === "file") handlePhoto(e.target);
     clearInvalid();
+  });
+  rFields.addEventListener("focusout", function (e) {
+    var t = e.target;
+    if (t && t.getAttribute && t.getAttribute("data-fmt") && t.value) t.value = applyFmt(t.getAttribute("data-fmt"), t.value);
   });
   rFields.addEventListener("keydown", function (e) {
     if (e.key === "Enter" && e.target && e.target.tagName === "INPUT" && e.target.type !== "radio") submitReq();
