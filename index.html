@@ -487,6 +487,25 @@
   .field input[aria-invalid="true"], .field select[aria-invalid="true"], .field textarea[aria-invalid="true"], .field.invalid .choice { border-color: var(--magenta); }
   .field textarea { min-height: 110px; resize: vertical; line-height: 1.4; }
 
+  /* Photo pickers (ID Picture, Passport Image) */
+  .field input[type="file"] { padding: 6px 8px; border-style: dashed; cursor: pointer; }
+  .field input[type="file"]::file-selector-button {
+    margin-right: 10px;
+    padding: 8px 14px;
+    border: 0;
+    border-radius: 10px;
+    background: var(--primary);
+    color: var(--on-primary);
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .photo-row { display: flex; align-items: center; gap: 10px; margin-top: 8px; }
+  .photo-row[hidden] { display: none; }
+  .photo-prev { width: 56px; height: 56px; object-fit: cover; border-radius: 10px; border: 1.5px solid var(--line); background: var(--bg); }
+  .photo-prev:not([src]) { visibility: hidden; }
+  .photo-status { font-size: 0.85rem; color: var(--muted); }
+
   /* Contact pop-up: buttons under "Send to Email" (not pinned) */
   .sticky-foot.static { position: static; margin: 0; padding: 4px 0 0; border-top: 0; background: transparent; }
   .req-links { display: flex; flex-direction: column; gap: 10px; margin-top: 10px; }
@@ -978,22 +997,38 @@
   var fSubmit = document.getElementById("fSubmit");
   var sending = false;
 
-  // Sends a list of [label, value] pairs to the shop's email through the form
-  // service. Resolves true if the service accepted it, false for any problem.
-  function postToForm(subject, pairs) {
-    var payload = {};
-    pairs.forEach(function (p) { payload[p[0]] = p[1]; });
-    payload._subject = subject;
-    payload._template = "table";
-    payload._captcha = "false";
+  // Sends a list of [label, value] pairs (and optional photo files) to the shop's
+  // email through the form service. Resolves true if the service accepted it.
+  function postToForm(subject, pairs, files) {
+    var hasFiles = !!(files && files.length);
+    var headers = { "Accept": "application/json" };
+    var body;
+
+    if (hasFiles) {
+      // photos need a multipart upload (the browser sets the Content-Type itself)
+      body = new FormData();
+      pairs.forEach(function (p) { body.append(p[0], p[1]); });
+      body.append("_subject", subject);
+      body.append("_template", "table");
+      body.append("_captcha", "false");
+      files.forEach(function (f) { body.append(f.field.replace(/\s+/g, "_"), f.blob, f.filename); });
+    } else {
+      var payload = {};
+      pairs.forEach(function (p) { payload[p[0]] = p[1]; });
+      payload._subject = subject;
+      payload._template = "table";
+      payload._captcha = "false";
+      headers["Content-Type"] = "application/json";
+      body = JSON.stringify(payload);
+    }
 
     var ctrl = ("AbortController" in window) ? new AbortController() : null;
-    var timer = setTimeout(function () { if (ctrl) ctrl.abort(); }, 15000);
+    var timer = setTimeout(function () { if (ctrl) ctrl.abort(); }, hasFiles ? 45000 : 15000);
 
     return fetch(SSS_ENDPOINT, {
       method: "POST",
-      headers: { "Content-Type": "application/json", "Accept": "application/json" },
-      body: JSON.stringify(payload),
+      headers: headers,
+      body: body,
       signal: ctrl ? ctrl.signal : undefined
     })
       .then(function (r) {
@@ -1150,7 +1185,9 @@
         { name: "Civil Status", type: "select", options: ["Single", "Married", "Widow", "Annulled", "Divorced"] },
         { name: "Mobile Number", type: "tel" },
         { name: "Passport No.", type: "text", cap: "characters" },
-        { name: "Pag-IBIG No.", type: "text", cap: "off" }
+        { name: "Pag-IBIG No.", type: "text", cap: "off" },
+        { name: "ID Picture", type: "photo" },
+        { name: "Passport Image", type: "photo" }
       ]
     },
     dmwUpdate: {
@@ -1164,7 +1201,9 @@
         { name: "Suffix", type: "text", cap: "words", optional: true },
         { name: "Gender", type: "choice", options: ["Male", "Female"] },
         { name: "Active Email Address", type: "email" },
-        { name: "Birthday", label: "Birthday (Mmm dd, yyyy)", type: "dateMDY" }
+        { name: "Birthday", label: "Birthday (Mmm dd, yyyy)", type: "dateMDY" },
+        { name: "ID Picture", type: "photo" },
+        { name: "Passport Image", type: "photo" }
       ]
     },
     contact: {
@@ -1193,6 +1232,70 @@
   var currentReq = null;
   var reqSending = false;
 
+  // Photos chosen in the open form: { fieldIndex: { busy } or { blob, url } }
+  var photos = {};
+  function releasePhotos() {
+    Object.keys(photos).forEach(function (k) {
+      if (photos[k] && photos[k].url) URL.revokeObjectURL(photos[k].url);
+    });
+    photos = {};
+  }
+
+  // Shrinks a phone photo (often 3-8 MB) to about 0.3-1 MB so it uploads quickly
+  function compressImage(file, maxDim, quality) {
+    return new Promise(function (resolve, reject) {
+      var url = URL.createObjectURL(file);
+      var img = new Image();
+      img.onload = function () {
+        var w = img.naturalWidth, h = img.naturalHeight;
+        var s = Math.min(1, maxDim / Math.max(w, h));
+        var cw = Math.max(1, Math.round(w * s)), ch = Math.max(1, Math.round(h * s));
+        var c = document.createElement("canvas");
+        c.width = cw; c.height = ch;
+        var ctx = c.getContext("2d");
+        ctx.fillStyle = "#fff";
+        ctx.fillRect(0, 0, cw, ch);
+        ctx.drawImage(img, 0, 0, cw, ch);
+        URL.revokeObjectURL(url);
+        c.toBlob(function (b) { b ? resolve(b) : reject(new Error("blob")); }, "image/jpeg", quality);
+      };
+      img.onerror = function () { URL.revokeObjectURL(url); reject(new Error("load")); };
+      img.src = url;
+    });
+  }
+
+  function handlePhoto(inp) {
+    var i = inp.getAttribute("data-i");
+    var file = inp.files && inp.files[0];
+    var row = inp.parentNode.querySelector(".photo-row");
+    var status = row.querySelector(".photo-status");
+    var img = row.querySelector("img");
+    if (photos[i] && photos[i].url) URL.revokeObjectURL(photos[i].url);
+    delete photos[i];
+    img.removeAttribute("src");
+    if (!file) { row.hidden = true; return; }
+    row.hidden = false;
+    if (!/^image\//.test(file.type)) {
+      status.textContent = "Please choose a photo (JPG or PNG).";
+      inp.value = "";
+      return;
+    }
+    photos[i] = { busy: true };
+    status.textContent = "Preparing photo\u2026";
+    compressImage(file, 1800, 0.85).then(function (blob) {
+      if (!document.body.contains(inp)) return;          // form was closed meanwhile
+      var url = URL.createObjectURL(blob);
+      photos[i] = { blob: blob, url: url };
+      img.src = url;
+      status.textContent = "Ready (" + Math.max(1, Math.round(blob.size / 1024)) + " KB)";
+    }).catch(function () {
+      if (!document.body.contains(inp)) return;
+      delete photos[i];
+      status.textContent = "Could not read this photo. Please choose a JPG or PNG image.";
+      inp.value = "";
+    });
+  }
+
   function fieldHtml(f, i) {
     var label = f.label || f.name;
     if (f.type === "choice") {
@@ -1203,6 +1306,11 @@
              '<span>' + label + '</span><span class="choices">' + radios + '</span></div>';
     }
     var attrs = 'type="text" autocapitalize="' + (f.cap || "off") + '"';
+    if (f.type === "photo") {
+      return '<label class="field"><span>' + label + '</span>' +
+             '<input type="file" accept="image/*" data-i="' + i + '" aria-label="' + label + '">' +
+             '<span class="photo-row" hidden><img class="photo-prev" alt=""><span class="photo-status"></span></span></label>';
+    }
     if (f.type === "textarea") {
       return '<label class="field"><span>' + label + '</span>' +
              '<textarea rows="4" data-i="' + i + '" autocomplete="off" autocapitalize="sentences" spellcheck="true"></textarea></label>';
@@ -1225,6 +1333,7 @@
   function openReq(key) {
     var cfg = REQ[key];
     currentReq = key;
+    releasePhotos();
     document.getElementById("rBadge").textContent = cfg.badge;
     document.getElementById("rTitle").textContent = cfg.title;
     rFields.innerHTML = cfg.fields.map(fieldHtml).join("");
@@ -1251,6 +1360,7 @@
   function closeReq() {
     reqOverlay.hidden = true;
     rFields.innerHTML = "";   // clears whatever was typed
+    releasePhotos();
   }
 
   function validDate(s) {
@@ -1263,9 +1373,17 @@
 
   // Returns { error, el } or { pairs }
   function collectReq(cfg) {
-    var pairs = [];
+    var pairs = [], files = [];
     for (var i = 0; i < cfg.fields.length; i++) {
       var f = cfg.fields[i], label = f.label || f.name, nm = f.name.replace(/\.$/, ""), el, v;
+      if (f.type === "photo") {
+        el = rFields.querySelector('input[data-i="' + i + '"]');
+        var ph = photos[i];
+        if (ph && ph.busy) return { error: "Please wait, your photo is still being prepared.", el: el };
+        if (!ph || !ph.blob) return { error: "Please attach " + nm + ".", el: el };
+        files.push({ field: f.name, blob: ph.blob });
+        continue;
+      }
       if (f.type === "choice") {
         var checked = rFields.querySelector('input[name="req_' + i + '"]:checked');
         el = rFields.querySelector('.field[data-i="' + i + '"]');
@@ -1291,7 +1409,16 @@
       }
       pairs.push([f.name, v]);
     }
-    return { pairs: pairs };
+    if (files.length) {
+      var who = {};
+      pairs.forEach(function (p) { who[p[0]] = p[1]; });
+      var slug = ((who["Last Name"] || "") + "-" + (who["First Name"] || "")).replace(/[^A-Za-z0-9]+/g, "-").replace(/^-+|-+$/g, "") || "applicant";
+      files.forEach(function (fl) {
+        fl.filename = fl.field.replace(/[^A-Za-z0-9]+/g, "-") + "_" + slug + ".jpg";
+        pairs.push([fl.field, "attached: " + fl.filename]);
+      });
+    }
+    return { pairs: pairs, files: files };
   }
 
   function clearInvalid() {
@@ -1300,7 +1427,28 @@
     Array.prototype.forEach.call(rFields.querySelectorAll(".invalid"), function (n) { n.classList.remove("invalid"); });
   }
 
-  function finishReq(ok, cfg, pairs, wasOpen, subj) {
+  // If automatic sending fails and the form has photos: an email link cannot carry
+  // attachments, so use the phone's share sheet (pick the email app) when possible.
+  function sendFilesFallback(subj, pairs, files) {
+    function viaMailto() {
+      toast("Could not send automatically. Your email app is opening. Please attach your ID picture and passport image, then tap Send.", 7500);
+      window.location.href = buildMailto(subj, pairs);
+    }
+    try {
+      var list = files.map(function (f) { return new File([f.blob], f.filename, { type: "image/jpeg" }); });
+      if (navigator.canShare && navigator.canShare({ files: list })) {
+        var text = "Send to: " + SSS_TO + "\n" + pairs.map(function (p) { return p[0] + ": " + p[1]; }).join("\n");
+        toast("Could not send automatically. Choose your email app and send to " + SSS_TO + ".", 6500);
+        navigator.share({ files: list, title: subj, text: text }).catch(function (err) {
+          if (!err || err.name !== "AbortError") viaMailto();
+        });
+        return;
+      }
+    } catch (e) {}
+    viaMailto();
+  }
+
+  function finishReq(ok, cfg, pairs, wasOpen, subj, files) {
     reqSending = false;
     rSubmit.disabled = false;
     rSubmit.textContent = cfg.submit || "Submit";
@@ -1308,8 +1456,12 @@
     if (ok) {
       toast(cfg.sent || "Your details were sent. Thank you!", 4500);
     } else if (wasOpen) {
-      toast("Could not send automatically. Your email app is opening. Tap Send to submit.", 5500);
-      window.location.href = buildMailto(subj || cfg.subject, pairs);
+      if (files && files.length) {
+        sendFilesFallback(subj || cfg.subject, pairs, files);
+      } else {
+        toast("Could not send automatically. Your email app is opening. Tap Send to submit.", 5500);
+        window.location.href = buildMailto(subj || cfg.subject, pairs);
+      }
     } else {
       toast("Not sent. Please try again.", 3000);
     }
@@ -1334,8 +1486,8 @@
     if (cfg.subjectFrom) {
       res.pairs.forEach(function (p) { if (p[0] === cfg.subjectFrom) subj = cfg.subject + ": " + p[1]; });
     }
-    postToForm(subj, res.pairs)
-      .then(function (ok) { finishReq(ok, cfg, res.pairs, !reqOverlay.hidden, subj); });
+    postToForm(subj, res.pairs, res.files)
+      .then(function (ok) { finishReq(ok, cfg, res.pairs, !reqOverlay.hidden, subj, res.files); });
   }
 
   // Birthday: type digits, hyphens are added for you
@@ -1350,7 +1502,10 @@
     }
     clearInvalid();
   });
-  rFields.addEventListener("change", clearInvalid);
+  rFields.addEventListener("change", function (e) {
+    if (e.target && e.target.type === "file") handlePhoto(e.target);
+    clearInvalid();
+  });
   rFields.addEventListener("keydown", function (e) {
     if (e.key === "Enter" && e.target && e.target.tagName === "INPUT" && e.target.type !== "radio") submitReq();
   });
