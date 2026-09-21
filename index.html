@@ -994,41 +994,50 @@
   var fErr = document.getElementById("fErr");
   var SSS_TO = "paprint088@gmail.com";
   var SSS_ENDPOINT = "https://formsubmit.co/ajax/" + SSS_TO;
+  var FORM_PAGE_ENDPOINT = "https://formsubmit.co/" + SSS_TO;   // regular form endpoint: the one that supports file attachments
   var fSubmit = document.getElementById("fSubmit");
   var sending = false;
 
-  // Sends a list of [label, value] pairs (and optional photo files) to the shop's
-  // email through the form service. Resolves true if the service accepted it.
+  // Sends a list of [label, value] pairs to the shop's email through the form service.
+  // Resolves true if it was accepted, false for any problem.
+  //  - text only   -> FormSubmit's AJAX endpoint (it answers with JSON, so success is confirmed)
+  //  - with photos -> FormSubmit's regular form endpoint, the one its documentation says
+  //    supports file attachments (the AJAX endpoint drops them). Another site can't read
+  //    that endpoint's reply, so a completed upload is counted as success.
   function postToForm(subject, pairs, files) {
     var hasFiles = !!(files && files.length);
-    var headers = { "Accept": "application/json" };
-    var body;
+    var ctrl = ("AbortController" in window) ? new AbortController() : null;
+    var timer = setTimeout(function () { if (ctrl) ctrl.abort(); }, hasFiles ? 60000 : 15000);
 
     if (hasFiles) {
-      // photos need a multipart upload (the browser sets the Content-Type itself)
-      body = new FormData();
-      pairs.forEach(function (p) { body.append(p[0], p[1]); });
-      body.append("_subject", subject);
-      body.append("_template", "table");
-      body.append("_captcha", "false");
-      files.forEach(function (f) { body.append(f.field.replace(/\s+/g, "_"), f.blob, f.filename); });
-    } else {
-      var payload = {};
-      pairs.forEach(function (p) { payload[p[0]] = p[1]; });
-      payload._subject = subject;
-      payload._template = "table";
-      payload._captcha = "false";
-      headers["Content-Type"] = "application/json";
-      body = JSON.stringify(payload);
+      var fd = new FormData();
+      pairs.forEach(function (p) { fd.append(p[0], p[1]); });
+      fd.append("_subject", subject);
+      fd.append("_template", "table");
+      fd.append("_captcha", "false");
+      files.forEach(function (f, n) {
+        fd.append(n === 0 ? "attachment" : "attachment" + (n + 1), f.blob, f.filename);
+      });
+      return fetch(FORM_PAGE_ENDPOINT, {
+        method: "POST",
+        body: fd,
+        mode: "no-cors",
+        signal: ctrl ? ctrl.signal : undefined
+      })
+        .then(function () { clearTimeout(timer); return true; })
+        .catch(function () { clearTimeout(timer); return false; });
     }
 
-    var ctrl = ("AbortController" in window) ? new AbortController() : null;
-    var timer = setTimeout(function () { if (ctrl) ctrl.abort(); }, hasFiles ? 45000 : 15000);
+    var payload = {};
+    pairs.forEach(function (p) { payload[p[0]] = p[1]; });
+    payload._subject = subject;
+    payload._template = "table";
+    payload._captcha = "false";
 
     return fetch(SSS_ENDPOINT, {
       method: "POST",
-      headers: headers,
-      body: body,
+      headers: { "Content-Type": "application/json", "Accept": "application/json" },
+      body: JSON.stringify(payload),
       signal: ctrl ? ctrl.signal : undefined
     })
       .then(function (r) {
