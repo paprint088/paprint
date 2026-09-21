@@ -1,0 +1,920 @@
+{
+  "app": "PaPrint & Copy",
+  "version": 1,
+  "exportedAt": "2026-09-21T10:58:06.558Z",
+  "categories": [
+    {
+      "id": "print",
+      "name": "Print",
+      "icon": "Printer",
+      "color": "#0EA5C4"
+    },
+    {
+      "id": "photocopy",
+      "name": "Photocopy",
+      "icon": "Copy",
+      "color": "#1B1D22"
+    },
+    {
+      "id": "id",
+      "name": "ID Picture",
+      "icon": "Image",
+      "color": "#D6247A"
+    },
+    {
+      "id": "others",
+      "name": "Others",
+      "icon": "Package",
+      "color": "#C98A00"
+    },
+    {
+      "id": "stationary",
+      "name": "Stationary",
+      "icon": "PenTool",
+      "color": "#0E9488"
+    }
+  ],
+  "menu": {
+    "print": [
+      {
+        "id": "p1",
+        "name": "Document",
+        "price": 10,
+        "account": "service",
+        "trackStock": false,
+        "stock": 0,
+        "lowStockThreshold": 5
+      },
+      {
+        "id": "p2",
+        "name": "Document",
+        "price": 15,
+        "account": "service",
+        "trackStock": false,
+        "stock": 0,
+        "lowStockThreshold": 5
+      },
+      {
+        "id": "p3",
+        "name": "Document",
+        "price": 20,
+        "account": "service",
+        "trackStock": false,
+        "stock": 0,
+        "lowStockThreshold": 5
+      },
+      {
+        "id": "p4",
+        "name": "Document",
+        "price": 25,
+        "account": "service",
+        "trackStock": false,
+        "stock": 0,
+        "lowStockThreshold": 5
+      },
+      {
+        "id": "p5",
+        "name": "Document",
+        "price": 30,
+        "account": "service",
+        "trackStock": false,
+        "stock": 0,
+        "lowStockThreshold": 5
+      },
+      {
+        "id": "print-photo-wallet-2pcs-mttoma6n-14vn",
+        "name": "Photo Wallet (2pcs)",
+        "price": 35,
+        "account": "service",
+        "trackStock": false,
+        "stock": 0,
+        "lowStockThreshold": 5
+      },
+      {
+        "id": "print-photo-3r-mttomq0m-6v4a",
+        "name": "Photo 3R",
+        "price": 30,
+        "account": "service",
+        "trackStock": false,
+        "stock": 0,
+        "lowStockThreshold": 5
+      },
+      {
+        "id": "print-photo-4r-mtton3fq-qjtt",
+        "name": "Photo 4R",
+        "price": 40,
+        "account": "service",
+        "trackStock": false,
+        "stock": 0,
+        "lowStockThreshold": 5
+      },
+      {
+        "id": "print-photo-5r-mttonha6-s181",
+        "name": "Photo 5R",
+        "price": 50,
+        "account": "service",
+        "trackStock": false,
+        "stock": 0,
+        "lowStockThreshold": 5
+      },
+      {
+        "id": "print-photo-a4-mttonxqm-0545",
+        "name": "Photo A4",
+        "price": 100,
+        "account": "service",
+        "trackStock": false,
+        "stock": 0,
+        "lowStockThreshold": 5
+      }
+    ],
+    "photocopy": [
+      {
+        "id": "c1",
+        "name": "B&W",
+        "price": 5,
+        "account": "service",
+        "trackStock": false,
+        "stock": 0,
+        "lowStockThreshold": 5
+      },
+      {
+        "id": "c2",
+        "name": "B&W",
+        "price": 10,
+        "account": "service",
+        "trackStock": false,
+        "stock": 0,
+        "lowStockThreshold": 5
+      },
+      {
+        "id": "c3",
+        "name": "Colored",
+        "price": 10,
+        "account": "service",
+        "trackStock": false,
+        "stock": 0,
+        "lowStockThreshold": 5
+      },
+      {
+        "id": "photocopy-colored-20-mttorl0t-lspx",
+        "name": "Colored",
+        "price": 15,
+        "account": "service",
+        "trackStock": false,
+        "stock": 0,
+        "lowStockThreshold": 5
+      },
+      {
+        "id": "photocopy-colored-25-mttoru5i-gr2v",
+        "name": "Colored",
+        "price": 20,
+        "account": "service",
+        "trackStock": false,
+        "stock": 0,
+        "lowStockThreshold": 5
+      },
+      {
+        "id": "colored-image-large-mu2sij5a-e08a",
+        "name": "Colored",
+        "price": 25,
+        "account": "service",
+        "trackStock": false,
+        "stock": 0,
+        "lowStockThreshold": 5
+      },
+      {
+        "id": "colored-image-full-mu2sixxk-jinr",
+        "name": "Colored",
+        "price": 30,
+        "account": "service",
+        "trackStock": false,
+        "stock": 0,
+        "lowStockThreshold": 5
+      }
+    ],
+    "id": [
+      {
+        "id": "i1",
+        "name": "1x1 6 pcs",
+        "price": 100,
+        "account": "service",
+        "trackStock": false,
+        "stock": 0,
+        "lowStockThreshold": 5
+      },
+      {
+        "id": "i2",
+        "name": "2x2 6 pcs",
+        "price": 150,
+        "account": "service",
+        "trackStock": false,
+        "stock": 0,
+        "lowStockThreshold": 5
+      },
+      {
+        "id": "i3",
+        "name": "Passport Size 6 pcs",
+        "price": 150,
+        "account": "service",
+        "trackStock": false,
+        "stock": 0,
+        "lowStockThreshold": 5
+      },
+      {
+        "id": "i4",
+        "name": "Set A",
+        "price": 150,
+        "account": "service",
+        "trackStock": false,
+        "stock": 0,
+        "lowStockThreshold": 5,
+        "bom": [
+          {
+            "supplyItemId": "photo-paper-3r-rc-satin-20s-mu1g8d6c-yyxo",
+            "supplyItemName": "Photo Paper 3R RC Satin 20s",
+            "qtyRequired": 1,
+            "unit": "sheet",
+            "costPerUnit": 1
+          }
+        ],
+        "costPrice": 1
+      },
+      {
+        "id": "id-pic-set-b-mttouuxz-gfjz",
+        "name": "Set B",
+        "price": 180,
+        "account": "service",
+        "trackStock": false,
+        "stock": 0,
+        "lowStockThreshold": 5,
+        "bom": [
+          {
+            "supplyItemId": "photo-paper-5r-rc-satin-20s-mu1ga85q-389i",
+            "supplyItemName": "Photo Paper 5R RC Satin 20s",
+            "qtyRequired": 1,
+            "unit": "sheet",
+            "costPerUnit": 1
+          }
+        ],
+        "costPrice": 1
+      },
+      {
+        "id": "id-pic-set-c-mttov8ee-4er6",
+        "name": "Set C",
+        "price": 180,
+        "account": "service",
+        "trackStock": false,
+        "stock": 0,
+        "lowStockThreshold": 5,
+        "bom": [
+          {
+            "supplyItemId": "photo-paper-4r-rc-satin-20s-mu1g95kc-cgkm",
+            "supplyItemName": "Photo Paper 4R RC Satin 20s",
+            "qtyRequired": 1,
+            "unit": "sheet",
+            "costPerUnit": 1
+          }
+        ],
+        "costPrice": 1
+      }
+    ],
+    "others": [
+      {
+        "id": "o1",
+        "name": "Lamination Small ID",
+        "price": 35,
+        "account": "service",
+        "trackStock": false,
+        "stock": 0,
+        "lowStockThreshold": 5
+      },
+      {
+        "id": "o2",
+        "name": "Lamination Medium ID",
+        "price": 40,
+        "account": "service",
+        "trackStock": false,
+        "stock": 0,
+        "lowStockThreshold": 5
+      },
+      {
+        "id": "o3",
+        "name": "Lamination 5R",
+        "price": 50,
+        "account": "service",
+        "trackStock": false,
+        "stock": 0,
+        "lowStockThreshold": 5
+      },
+      {
+        "id": "o4",
+        "name": "Lamination A4/Long",
+        "price": 100,
+        "account": "service",
+        "trackStock": false,
+        "stock": 0,
+        "lowStockThreshold": 5
+      },
+      {
+        "id": "o5",
+        "name": "Layout / Editing",
+        "price": 20,
+        "account": "service",
+        "trackStock": false,
+        "stock": 0,
+        "lowStockThreshold": 5
+      }
+    ],
+    "stationary": [
+      {
+        "id": "s2",
+        "name": "Bond Paper 70gsm Short",
+        "price": 1,
+        "account": "sales",
+        "trackStock": true,
+        "stock": 2001,
+        "lowStockThreshold": 20,
+        "costPrice": 0.29,
+        "startingStock": 1500,
+        "uom": {
+          "enabled": true,
+          "baseUnit": "ream",
+          "subUnit": "sheets",
+          "conversionRatio": 500,
+          "bulkStock": 0,
+          "openStock": -2001,
+          "baseUnitPrice": 180,
+          "baseUnitCost": 134
+        }
+      },
+      {
+        "id": "bond-paper-70gsm-a4-mu2e9uvr-ntvb",
+        "name": "Bond Paper 70gsm A4",
+        "price": 1,
+        "account": "sales",
+        "trackStock": true,
+        "stock": 1500,
+        "lowStockThreshold": 5,
+        "costPrice": 0.33,
+        "uom": {
+          "enabled": true,
+          "baseUnit": "ream",
+          "subUnit": "sheets",
+          "conversionRatio": 500,
+          "bulkStock": 2,
+          "openStock": 500,
+          "baseUnitPrice": 200,
+          "baseUnitCost": 143
+        }
+      },
+      {
+        "id": "bond-paper-70gsm-long-mu2ea4ln-rq26",
+        "name": "Bond Paper 70gsm Long",
+        "price": 1,
+        "account": "sales",
+        "trackStock": true,
+        "stock": 1000,
+        "lowStockThreshold": 5,
+        "uom": {
+          "enabled": true,
+          "baseUnit": "ream",
+          "subUnit": "sheets",
+          "conversionRatio": 500,
+          "bulkStock": 1,
+          "openStock": 500,
+          "baseUnitPrice": 220,
+          "baseUnitCost": 159
+        }
+      },
+      {
+        "id": "s3",
+        "name": "Folder",
+        "price": 15,
+        "account": "sales",
+        "trackStock": true,
+        "stock": 15,
+        "lowStockThreshold": 5
+      },
+      {
+        "id": "s4",
+        "name": "Brown Envelope",
+        "price": 10,
+        "account": "sales",
+        "trackStock": true,
+        "stock": 20,
+        "lowStockThreshold": 5
+      },
+      {
+        "id": "plastic-envelope-mtuqp4oz-ukao",
+        "name": "Plastic Envelope",
+        "price": 25,
+        "account": "sales",
+        "trackStock": true,
+        "stock": 20,
+        "lowStockThreshold": 5
+      },
+      {
+        "id": "s1",
+        "name": "Ballpen",
+        "price": 15,
+        "account": "sales",
+        "trackStock": true,
+        "stock": 20,
+        "lowStockThreshold": 5
+      },
+      {
+        "id": "scissor-mtwwpwii-r7g9",
+        "name": "Scissor",
+        "price": 25,
+        "account": "sales",
+        "trackStock": true,
+        "stock": 10,
+        "lowStockThreshold": 3
+      },
+      {
+        "id": "id-holder-jl-107-mtwws5al-x4az",
+        "name": "ID Holder JL-107",
+        "price": 10,
+        "account": "sales",
+        "trackStock": true,
+        "stock": 30,
+        "lowStockThreshold": 5
+      },
+      {
+        "id": "id-holder-cx-108-mtwwvfve-pxqr",
+        "name": "ID Holder CX-108",
+        "price": 10,
+        "account": "sales",
+        "trackStock": true,
+        "stock": 30,
+        "lowStockThreshold": 5
+      },
+      {
+        "id": "id-lace-plaine-1-2-mtwwxj38-kvbt",
+        "name": "ID Lace Plain 1/2",
+        "price": 10,
+        "account": "sales",
+        "trackStock": true,
+        "stock": 30,
+        "lowStockThreshold": 5
+      },
+      {
+        "id": "photo-paper-3r-rc-satin-20s-mu1g8d6c-yyxo",
+        "name": "Photo Paper 3R RC Satin",
+        "price": 45,
+        "account": "sales",
+        "trackStock": true,
+        "stock": 119,
+        "lowStockThreshold": 5,
+        "uom": {
+          "enabled": true,
+          "baseUnit": "pack",
+          "subUnit": "pcs",
+          "conversionRatio": 20,
+          "bulkStock": 5,
+          "openStock": 19,
+          "baseUnitPrice": 50,
+          "baseUnitCost": 35
+        }
+      },
+      {
+        "id": "photo-paper-4r-rc-satin-20s-mu1g95kc-cgkm",
+        "name": "Photo Paper 4R RC Satin",
+        "price": 55,
+        "account": "sales",
+        "trackStock": true,
+        "stock": 100,
+        "lowStockThreshold": 5,
+        "uom": {
+          "enabled": true,
+          "baseUnit": "pack",
+          "subUnit": "pcs",
+          "conversionRatio": 20,
+          "bulkStock": 4,
+          "openStock": 20,
+          "baseUnitPrice": 70,
+          "baseUnitCost": 45
+        }
+      },
+      {
+        "id": "photo-paper-5r-rc-satin-20s-mu1ga85q-389i",
+        "name": "Photo Paper 5R RC Satin",
+        "price": 72,
+        "account": "sales",
+        "trackStock": true,
+        "stock": 120,
+        "lowStockThreshold": 5,
+        "uom": {
+          "enabled": true,
+          "baseUnit": "pack",
+          "subUnit": "pcs",
+          "conversionRatio": 20,
+          "bulkStock": 5,
+          "openStock": 20,
+          "baseUnitPrice": 70,
+          "baseUnitCost": 55
+        }
+      },
+      {
+        "id": "photo-paper-5r-rc-glossy-copy-mu2qelm3-q0pi",
+        "name": "Photo Paper 4R RC Glossy",
+        "price": 70,
+        "account": "sales",
+        "trackStock": true,
+        "stock": 0,
+        "lowStockThreshold": 5
+      },
+      {
+        "id": "photo-paper-5r-rc-glossy-mu1gas55-vn3o",
+        "name": "Photo Paper 5R RC Glossy",
+        "price": 70,
+        "account": "sales",
+        "trackStock": true,
+        "stock": 120,
+        "lowStockThreshold": 5,
+        "uom": {
+          "enabled": true,
+          "baseUnit": "pack",
+          "subUnit": "pcs",
+          "conversionRatio": 20,
+          "bulkStock": 5,
+          "openStock": 20,
+          "baseUnitPrice": 80,
+          "baseUnitCost": 60
+        }
+      }
+    ]
+  },
+  "transactions": [
+    {
+      "id": "txn:2609-00001",
+      "receiptNo": "2609-00001",
+      "timestamp": 1789108097095,
+      "dateLabel": "9/11/2026, 2:28:17 PM",
+      "items": [
+        {
+          "name": "Print Doc 10",
+          "price": 10,
+          "qty": 1,
+          "lineTotal": 10,
+          "account": "service"
+        },
+        {
+          "name": "Print Doc 15",
+          "price": 15,
+          "qty": 1,
+          "lineTotal": 15,
+          "account": "service"
+        },
+        {
+          "name": "Photocopy B&W Text",
+          "price": 5,
+          "qty": 1,
+          "lineTotal": 5,
+          "account": "service"
+        },
+        {
+          "name": "Ballpen",
+          "price": 15,
+          "qty": 1,
+          "lineTotal": 15,
+          "account": "sales"
+        },
+        {
+          "name": "Brown Envelope",
+          "price": 10,
+          "qty": 1,
+          "lineTotal": 10,
+          "account": "sales"
+        },
+        {
+          "name": "Plastic Envelope",
+          "price": 25,
+          "qty": 1,
+          "lineTotal": 25,
+          "account": "sales"
+        }
+      ],
+      "subtotal": 80,
+      "discountType": "none",
+      "discountValue": 0,
+      "discountAmount": 0,
+      "total": 80,
+      "paymentMethod": "cash",
+      "paymentNote": "",
+      "customerName": "",
+      "customerAddress": "",
+      "customerTIN": "",
+      "tendered": 100,
+      "change": 20
+    },
+    {
+      "id": "txn:2609-00002",
+      "receiptNo": "2609-00002",
+      "timestamp": 1789108109394,
+      "dateLabel": "9/11/2026, 2:28:29 PM",
+      "items": [
+        {
+          "name": "Ballpen",
+          "price": 15,
+          "qty": 1,
+          "lineTotal": 15,
+          "account": "sales"
+        },
+        {
+          "name": "Brown Envelope",
+          "price": 10,
+          "qty": 2,
+          "lineTotal": 20,
+          "account": "sales"
+        },
+        {
+          "name": "Plastic Envelope",
+          "price": 25,
+          "qty": 2,
+          "lineTotal": 50,
+          "account": "sales"
+        }
+      ],
+      "subtotal": 85,
+      "discountType": "none",
+      "discountValue": 0,
+      "discountAmount": 0,
+      "total": 85,
+      "paymentMethod": "cash",
+      "paymentNote": "",
+      "customerName": "Betchay",
+      "customerAddress": "",
+      "customerTIN": "",
+      "tendered": 100,
+      "change": 15
+    },
+    {
+      "id": "txn:2609-00003",
+      "receiptNo": "2609-00003",
+      "timestamp": 1789108135683,
+      "dateLabel": "9/11/2026, 2:28:55 PM",
+      "items": [
+        {
+          "name": "Photocopy B&W Text",
+          "price": 5,
+          "qty": 15,
+          "lineTotal": 75,
+          "account": "service"
+        }
+      ],
+      "subtotal": 75,
+      "discountType": "none",
+      "discountValue": 0,
+      "discountAmount": 0,
+      "total": 75,
+      "paymentMethod": "cash",
+      "paymentNote": "",
+      "customerName": "",
+      "customerAddress": "",
+      "customerTIN": "",
+      "tendered": 75,
+      "change": 0
+    },
+    {
+      "id": "txn:2609-00004",
+      "receiptNo": "2609-00004",
+      "timestamp": 1789123960569,
+      "dateLabel": "9/11/2026, 6:52:40 PM",
+      "items": [
+        {
+          "name": "Lamination A4/Long",
+          "price": 100,
+          "qty": 1,
+          "lineTotal": 100,
+          "account": "service"
+        }
+      ],
+      "subtotal": 100,
+      "discountType": "none",
+      "discountValue": 0,
+      "discountAmount": 0,
+      "total": 100,
+      "paymentMethod": "cash",
+      "paymentNote": "",
+      "customerName": "",
+      "customerAddress": "",
+      "customerTIN": "",
+      "tendered": 100,
+      "change": 0
+    },
+    {
+      "id": "txn:2609-00005",
+      "receiptNo": "2609-00005",
+      "timestamp": 1789128017513,
+      "dateLabel": "9/11/2026, 8:00:17 PM",
+      "items": [
+        {
+          "name": "Print Doc 10",
+          "price": 10,
+          "qty": 3,
+          "lineTotal": 30,
+          "account": "service"
+        },
+        {
+          "name": "Photocopy B&W Text",
+          "price": 5,
+          "qty": 25,
+          "lineTotal": 125,
+          "account": "service"
+        }
+      ],
+      "subtotal": 155,
+      "discountType": "fixed",
+      "discountValue": 5,
+      "discountAmount": 5,
+      "total": 150,
+      "paymentMethod": "cash",
+      "paymentNote": "",
+      "customerName": "",
+      "customerAddress": "",
+      "customerTIN": "",
+      "tendered": 150,
+      "change": 0
+    },
+    {
+      "id": "txn:2609-00006",
+      "receiptNo": "2609-00006",
+      "timestamp": 1789398930790,
+      "dateLabel": "9/14/2026, 11:15:30 PM",
+      "items": [
+        {
+          "name": "Lamination Small ID",
+          "price": 35,
+          "qty": 2,
+          "lineTotal": 70,
+          "account": "service"
+        }
+      ],
+      "subtotal": 70,
+      "discountType": "none",
+      "discountValue": 0,
+      "discountAmount": 0,
+      "total": 70,
+      "paymentMethod": "cash",
+      "paymentNote": "",
+      "customerName": "",
+      "customerAddress": "",
+      "customerTIN": "",
+      "tendered": 100,
+      "change": 30,
+      "userNick": "Lanie",
+      "userRole": "cashier",
+      "terminalId": "001-POS-00001"
+    },
+    {
+      "id": "txn:2609-00007",
+      "receiptNo": "2609-00007",
+      "timestamp": 1789403261859,
+      "dateLabel": "9/15/2026, 12:27:41 AM",
+      "items": [
+        {
+          "name": "ID Pic Set A",
+          "price": 150,
+          "qty": 1,
+          "lineTotal": 150,
+          "account": "service"
+        }
+      ],
+      "subtotal": 150,
+      "discountType": "none",
+      "discountValue": 0,
+      "discountAmount": 0,
+      "total": 150,
+      "paymentMethod": "cash",
+      "paymentNote": "",
+      "customerName": "",
+      "customerAddress": "",
+      "customerTIN": "",
+      "tendered": 150,
+      "change": 0,
+      "userNick": "Admin",
+      "userRole": "admin",
+      "terminalId": "001-POS-00001"
+    },
+    {
+      "id": "txn:2609-00008",
+      "receiptNo": "2609-00008",
+      "timestamp": 1789465228094,
+      "dateLabel": "9/15/2026, 5:40:28 PM",
+      "items": [
+        {
+          "name": "Print Doc 10",
+          "price": 10,
+          "qty": 3,
+          "lineTotal": 30,
+          "account": "service"
+        },
+        {
+          "name": "Print Doc 15",
+          "price": 15,
+          "qty": 2,
+          "lineTotal": 30,
+          "account": "service"
+        },
+        {
+          "name": "Ballpen",
+          "price": 15,
+          "qty": 3,
+          "lineTotal": 45,
+          "account": "sales"
+        }
+      ],
+      "subtotal": 105,
+      "discountType": "none",
+      "discountValue": 0,
+      "discountAmount": 0,
+      "total": 105,
+      "paymentMethod": "cash",
+      "paymentNote": "",
+      "customerName": "",
+      "customerAddress": "",
+      "customerTIN": "",
+      "tendered": 120,
+      "change": 15,
+      "userNick": "Admin",
+      "userRole": "admin",
+      "terminalId": "001-POS-00001",
+      "rawMaterialsUsed": [
+        {
+          "supplyItemId": "bond-paper-70gsm-a4-mu2e9uvr-ntvb",
+          "supplyItemName": "Bond Paper 70gsm A4",
+          "qty": 5,
+          "unit": "sheets",
+          "costPerUnit": 0.33
+        }
+      ]
+    },
+    {
+      "id": "txn:2609-00009",
+      "receiptNo": "2609-00009",
+      "timestamp": 1789486852016,
+      "dateLabel": "9/15/2026, 11:40:52 PM",
+      "items": [
+        {
+          "name": "Document",
+          "price": 10,
+          "qty": 2,
+          "lineTotal": 20,
+          "account": "service",
+          "saleUnit": "retail"
+        },
+        {
+          "name": "Document",
+          "price": 15,
+          "qty": 5,
+          "lineTotal": 75,
+          "account": "service",
+          "saleUnit": "retail"
+        },
+        {
+          "name": "Bond Paper 70gsm Short (ream)",
+          "price": 180,
+          "qty": 1,
+          "lineTotal": 180,
+          "account": "sales",
+          "saleUnit": "bulk",
+          "unitLabel": "ream",
+          "originalItemId": "s2"
+        },
+        {
+          "name": "Ballpen",
+          "price": 15,
+          "qty": 2,
+          "lineTotal": 30,
+          "account": "sales",
+          "saleUnit": "retail"
+        }
+      ],
+      "subtotal": 305,
+      "discountType": "none",
+      "discountValue": 0,
+      "discountAmount": 0,
+      "total": 305,
+      "paymentMethod": "cash",
+      "paymentNote": "",
+      "customerName": "",
+      "customerAddress": "",
+      "customerTIN": "",
+      "tendered": 320,
+      "change": 15,
+      "userNick": "Admin",
+      "userRole": "admin",
+      "terminalId": "001-POS-00001",
+      "rawMaterialsUsed": [
+        {
+          "supplyItemId": "s2",
+          "supplyItemName": "Bond Paper 70gsm Short",
+          "qty": 7,
+          "unit": "sheets",
+          "costPerUnit": 0.29
+        }
+      ]
+    }
+  ]
+}
