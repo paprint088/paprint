@@ -698,14 +698,7 @@
     <div class="who"><span class="badge" id="dBadge" aria-hidden="true"></span><h2 id="dTitle"></h2></div>
     <p class="value" id="dValue"></p>
     <p class="note" id="dNote"></p>
-    <div class="opts" id="dOpts" hidden>
-      <button class="opt" type="button" data-form="nbiNew" data-say="New Clearance Certificate">
-        <span class="badge b-emoji" aria-hidden="true">🆕</span>New Clearance Certificate
-      </button>
-      <button class="opt" type="button" data-form="nbiRenew" data-say="Renew Clearance">
-        <span class="badge b-emoji" aria-hidden="true">🔁</span>Renew Clearance
-      </button>
-    </div>
+    <div class="opts" id="dOpts" hidden></div>
     <div class="actions" id="dActions">
       <button class="btn primary" id="dGo" type="button" hidden></button>
       <button class="btn primary" id="dCopy" type="button"></button>
@@ -841,8 +834,12 @@
       open: "Open Telegram",
       href: "https://t.me/+639497218888"
     },
-    nbi:       { name: "NBI Online Appointment",        badge: "🪪", cls: "b-emoji", value: "", note: "", opts: true },
-    dmw:       { name: "DMW eReg and PEOS",             badge: "✈️", cls: "b-emoji", value: "", note: "Details coming soon." },
+    nbi:       { name: "NBI Online Appointment",        badge: "🪪", cls: "b-emoji", value: "", note: "",
+                 opts: [ { label: "New Clearance Certificate", form: "nbiNew",   badge: "🆕" },
+                         { label: "Renew Clearance",           form: "nbiRenew", badge: "🔁" } ] },
+    dmw:       { name: "DMW eReg and PEOS",             badge: "✈️", cls: "b-emoji", value: "", note: "",
+                 opts: [ { label: "New Signup",         form: "dmwNew",    badge: "📝" },
+                         { label: "Recovery or Update", form: "dmwUpdate", badge: "🔄" } ] },
     psa:       { name: "PSA Appointment",               badge: "📜", cls: "b-emoji", value: "", note: "Details coming soon." },
     passport:  { name: "DFA Passport New and Renewal",  badge: "🛂", cls: "b-emoji", value: "", note: "Details coming soon." },
     apostille: { name: "DFA Apostille Appointment",     badge: "📑", cls: "b-emoji", value: "", note: "Details coming soon." },
@@ -907,7 +904,16 @@
     var noteEl = document.getElementById("dNote");
     noteEl.textContent = c.note || "";
     noteEl.hidden = !c.note;
-    document.getElementById("dOpts").hidden = !c.opts;
+    var optsEl = document.getElementById("dOpts");
+    if (c.opts) {
+      optsEl.innerHTML = c.opts.map(function (o) {
+        return '<button class="opt" type="button" data-form="' + o.form + '" data-say="' + o.label + '">' +
+               '<span class="badge b-emoji" aria-hidden="true">' + o.badge + '</span>' + o.label + '</button>';
+      }).join("");
+    } else {
+      optsEl.innerHTML = "";
+    }
+    optsEl.hidden = !c.opts;
     var copyBtn = document.getElementById("dCopy");
     copyBtn.textContent = c.copy || "";
     copyBtn.hidden = !c.copy;
@@ -1081,6 +1087,22 @@
 
   // ---------- NBI request forms (New Clearance Certificate / Renew Clearance) ----------
   var REQ_NOTE = "Please check spelling before you submit.";
+  var DMW_NOTE = "Please check details before you submit.";
+
+  // Birthday typed as "Jan 15, 1990" (also accepts "january 15 1990"); returns "Jan 15, 1990" or null
+  var MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+  function normMDY(s) {
+    var m = /^([A-Za-z]{3,9})\.?\s*(\d{1,2})\s*,?\s*(\d{4})$/.exec(s.trim());
+    if (!m) return null;
+    var word = m[1].toLowerCase(), mi = -1;
+    for (var k = 0; k < 12; k++) { if (MONTHS[k].toLowerCase().indexOf(word) === 0) { mi = k; break; } }
+    if (mi < 0) return null;
+    var d = +m[2], y = +m[3];
+    var dt = new Date(y, mi, d);
+    if (dt.getFullYear() !== y || dt.getMonth() !== mi || dt.getDate() !== d) return null;
+    if (y < 1900 || dt > new Date()) return null;
+    return MONTHS[mi].slice(0, 3) + " " + (d < 10 ? "0" + d : d) + ", " + y;
+  }
   var REQ = {
     nbiNew: {
       title: "New Clearance Certificate", badge: "\uD83C\uDD95",
@@ -1108,6 +1130,41 @@
         { name: "NBI ID Number", type: "text", cap: "off" },
         { name: "Mobile Number", type: "tel" },
         { name: "Active Email Address", type: "email" }
+      ]
+    },
+    dmwNew: {
+      title: "New Signup", badge: "\uD83D\uDCDD",
+      subject: "DMW eReg and PEOS New Signup request",
+      note: DMW_NOTE,
+      fields: [
+        { name: "First Name", type: "text", cap: "words" },
+        { name: "Middle Name", type: "text", cap: "words", optional: true },
+        { name: "Last Name", type: "text", cap: "words" },
+        { name: "Suffix", type: "text", cap: "words", optional: true },
+        { name: "Gender", type: "choice", options: ["Male", "Female"] },
+        { name: "Active Email Address", type: "email" },
+        { name: "Birthday", label: "Birthday (Mmm dd, yyyy)", type: "dateMDY" },
+        { name: "Religion", type: "text", cap: "words" },
+        { name: "Weight (kg)", type: "number", min: 10, max: 500 },
+        { name: "Height (cm)", type: "number", min: 30, max: 260 },
+        { name: "Civil Status", type: "select", options: ["Single", "Married", "Widow", "Annulled", "Divorced"] },
+        { name: "Mobile Number", type: "tel" },
+        { name: "Passport No.", type: "text", cap: "characters" },
+        { name: "Pag-IBIG No.", type: "text", cap: "off" }
+      ]
+    },
+    dmwUpdate: {
+      title: "Recovery or Update", badge: "\uD83D\uDD04",
+      subject: "DMW eReg and PEOS Recovery or Update request",
+      note: DMW_NOTE,
+      fields: [
+        { name: "First Name", type: "text", cap: "words" },
+        { name: "Middle Name", type: "text", cap: "words", optional: true },
+        { name: "Last Name", type: "text", cap: "words" },
+        { name: "Suffix", type: "text", cap: "words", optional: true },
+        { name: "Gender", type: "choice", options: ["Male", "Female"] },
+        { name: "Active Email Address", type: "email" },
+        { name: "Birthday", label: "Birthday (Mmm dd, yyyy)", type: "dateMDY" }
       ]
     },
     contact: {
@@ -1159,6 +1216,8 @@
     if (f.type === "tel")   attrs = 'type="tel" inputmode="tel" autocapitalize="off"';
     if (f.type === "email") attrs = 'type="email" inputmode="email" autocapitalize="off"';
     if (f.type === "date")  attrs = 'type="text" inputmode="numeric" placeholder="YYYY-MM-DD" maxlength="10" autocapitalize="off"';
+    if (f.type === "dateMDY") attrs = 'type="text" placeholder="Mmm dd, yyyy" maxlength="18" autocapitalize="words"';
+    if (f.type === "number")  attrs = 'type="text" inputmode="decimal" autocapitalize="off"';
     return '<label class="field"><span>' + label + '</span>' +
            '<input ' + attrs + ' data-i="' + i + '" autocomplete="off" autocorrect="off" spellcheck="false"></label>';
   }
@@ -1206,19 +1265,29 @@
   function collectReq(cfg) {
     var pairs = [];
     for (var i = 0; i < cfg.fields.length; i++) {
-      var f = cfg.fields[i], label = f.label || f.name, el, v;
+      var f = cfg.fields[i], label = f.label || f.name, nm = f.name.replace(/\.$/, ""), el, v;
       if (f.type === "choice") {
         var checked = rFields.querySelector('input[name="req_' + i + '"]:checked');
         el = rFields.querySelector('.field[data-i="' + i + '"]');
         v = checked ? checked.value : "";
-        if (!v) return { error: "Please select " + f.name + ".", el: el, group: true };
+        if (!v) return { error: "Please select " + nm + ".", el: el, group: true };
       } else {
         el = rFields.querySelector('input[data-i="' + i + '"], select[data-i="' + i + '"], textarea[data-i="' + i + '"]');
         v = el.value.trim();
-        if (!v && !f.optional) return { error: (f.type === "select" ? "Please select " : "Please fill in ") + f.name + ".", el: el };
+        if (!v && !f.optional) return { error: (f.type === "select" ? "Please select " : "Please fill in ") + nm + ".", el: el };
         if (v && f.type === "date" && !validDate(v)) return { error: "Please enter Birthday as YYYY-MM-DD.", el: el };
         if (v && f.type === "tel" && v.replace(/\D/g, "").length < 10) return { error: "Please enter a valid Mobile Number.", el: el };
         if (v && f.type === "email" && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) return { error: "Please enter a valid Email Address.", el: el };
+        if (v && f.type === "dateMDY") {
+          var nd = normMDY(v);
+          if (!nd) return { error: "Please enter Birthday as Mmm dd, yyyy (example: Jan 15, 1990).", el: el };
+          v = nd;
+        }
+        if (v && f.type === "number") {
+          var num = parseFloat(v.replace(",", "."));
+          if (!(num >= f.min && num <= f.max) || !/^\d+([.,]\d+)?$/.test(v)) return { error: "Please enter a valid " + nm + ".", el: el };
+          v = String(num);
+        }
       }
       pairs.push([f.name, v]);
     }
@@ -1293,12 +1362,13 @@
     openReq("contact");
   });
 
-  // New Clearance Certificate / Renew Clearance buttons inside the NBI pop-up
-  Array.prototype.forEach.call(document.querySelectorAll(".opt"), function (el) {
-    el.addEventListener("click", function () {
-      closeDialog();
-      openReq(el.getAttribute("data-form"));
-    });
+  // Option buttons inside a pop-up (NBI: New / Renew, DMW: New Signup / Recovery or Update)
+  document.getElementById("dOpts").addEventListener("click", function (e) {
+    var btn = e.target.closest ? e.target.closest(".opt") : null;
+    if (!btn) return;
+    speak(btn.getAttribute("data-say"));
+    closeDialog();
+    openReq(btn.getAttribute("data-form"));
   });
 
   // ---------- Pages (Home, Printing, ...) ----------
