@@ -251,7 +251,7 @@
   /* Options */
   .tabs { display: flex; flex-direction: column; gap: 10px; margin: 26px 0 0; }
   .row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-  .tab {
+  .tab, .opt {
     appearance: none;
     -webkit-appearance: none;
     display: flex;
@@ -276,7 +276,7 @@
     border-color: var(--ink);
   }
   .row .tab { gap: 8px; padding: 6px 8px; min-width: 0; font-size: 0.95rem; }
-  .tab:focus-visible, .btn:focus-visible, .chip:focus-visible, .close:focus-visible,
+  .tab:focus-visible, .opt:focus-visible, .btn:focus-visible, .chip:focus-visible, .close:focus-visible,
   .menu-btn:focus-visible, .back:focus-visible {
     outline: 3px solid var(--focus);
     outline-offset: 2px;
@@ -412,7 +412,7 @@
   /* SSS details form */
   .field { display: block; margin: 0 0 12px; }
   .field > span:first-child { display: block; margin-bottom: 4px; font-weight: 600; font-size: 0.9rem; }
-  .field input {
+  .field input:not([type="radio"]), .field select {
     width: 100%;
     min-height: 48px;
     padding: 8px 12px;
@@ -437,12 +437,44 @@
     font-weight: 600;
     cursor: pointer;
   }
-  .field input:focus-visible, .show-btn:focus-visible {
+  .field input:focus-visible, .field select:focus-visible, .show-btn:focus-visible, .choice input:focus-visible {
     outline: 3px solid var(--focus);
     outline-offset: 2px;
   }
   .err { margin: 0 0 12px; color: var(--magenta); font-weight: 600; font-size: 0.9rem; }
   .dialog .submit { width: 100%; }
+
+  /* Options inside a pop-up (e.g. NBI New / Renew) */
+  .sticky-foot {
+    position: sticky;
+    bottom: -18px;
+    margin: 0 -18px -18px;
+    padding: 10px 18px 18px;
+    background: var(--surface);
+    border-top: 1px solid var(--line);
+  }
+  .sticky-foot .note { margin: 0 0 8px; }
+  .opts { display: flex; flex-direction: column; gap: 10px; margin: 0 0 4px; }
+
+  /* Gender choice and invalid fields in request forms */
+  .choices { display: flex; gap: 8px; }
+  .choice {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 48px;
+    padding: 0 12px;
+    background: var(--bg);
+    border: 1.5px solid var(--line);
+    border-radius: 12px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .choice input { width: 18px; height: 18px; margin: 0; accent-color: var(--primary); }
+  .choice:has(input:checked) { border-color: var(--ink); }
+  .field input[aria-invalid="true"], .field select[aria-invalid="true"], .field.invalid .choice { border-color: var(--magenta); }
 
   .toast {
     position: fixed;
@@ -646,6 +678,14 @@
     <div class="who"><span class="badge" id="dBadge" aria-hidden="true"></span><h2 id="dTitle"></h2></div>
     <p class="value" id="dValue"></p>
     <p class="note" id="dNote"></p>
+    <div class="opts" id="dOpts" hidden>
+      <button class="opt" type="button" data-form="nbiNew" data-say="New Clearance Certificate">
+        <span class="badge b-emoji" aria-hidden="true">🆕</span>New Clearance Certificate
+      </button>
+      <button class="opt" type="button" data-form="nbiRenew" data-say="Renew Clearance">
+        <span class="badge b-emoji" aria-hidden="true">🔁</span>Renew Clearance
+      </button>
+    </div>
     <div class="actions" id="dActions">
       <button class="btn primary" id="dGo" type="button" hidden></button>
       <button class="btn primary" id="dCopy" type="button"></button>
@@ -673,6 +713,19 @@
     <p class="note" id="fNote">Be sure with the spelling and case of password.</p>
     <p class="err" id="fErr" role="alert" hidden>Please fill in both Account ID and Password.</p>
     <button class="btn primary submit" id="fSubmit" type="button">Submit</button>
+  </div>
+</div>
+
+<div class="overlay" id="reqOverlay" hidden>
+  <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="rTitle">
+    <button class="close" id="rClose" type="button" aria-label="Close">&times;</button>
+    <div class="who"><span class="badge b-emoji" id="rBadge" aria-hidden="true"></span><h2 id="rTitle"></h2></div>
+    <div id="rFields"></div>
+    <div class="sticky-foot">
+      <p class="note" id="rNote"></p>
+      <p class="err" id="rErr" role="alert" hidden></p>
+      <button class="btn primary submit" id="rSubmit" type="button">Submit</button>
+    </div>
   </div>
 </div>
 
@@ -767,7 +820,7 @@
       open: "Open Telegram",
       href: "https://t.me/+639497218888"
     },
-    nbi:       { name: "NBI Online Appointment",        badge: "🪪", cls: "b-emoji", value: "", note: "Details coming soon." },
+    nbi:       { name: "NBI Online Appointment",        badge: "🪪", cls: "b-emoji", value: "", note: "", opts: true },
     dmw:       { name: "DMW eReg and PEOS",             badge: "✈️", cls: "b-emoji", value: "", note: "Details coming soon." },
     psa:       { name: "PSA Appointment",               badge: "📜", cls: "b-emoji", value: "", note: "Details coming soon." },
     passport:  { name: "DFA Passport New and Renewal",  badge: "🛂", cls: "b-emoji", value: "", note: "Details coming soon." },
@@ -830,7 +883,10 @@
     var val = document.getElementById("dValue");
     val.textContent = c.value || "";
     val.hidden = !c.value;
-    document.getElementById("dNote").textContent = c.note;
+    var noteEl = document.getElementById("dNote");
+    noteEl.textContent = c.note || "";
+    noteEl.hidden = !c.note;
+    document.getElementById("dOpts").hidden = !c.opts;
     var copyBtn = document.getElementById("dCopy");
     copyBtn.textContent = c.copy || "";
     copyBtn.hidden = !c.copy;
@@ -867,7 +923,8 @@
   overlay.addEventListener("click", function (e) { if (e.target === overlay) closeDialog(); });
   document.addEventListener("keydown", function (e) {
     if (e.key !== "Escape") return;
-    if (!formOverlay.hidden) closeForm();
+    if (!reqOverlay.hidden) closeReq();
+    else if (!formOverlay.hidden) closeForm();
     else if (!overlay.hidden) closeDialog();
   });
 
@@ -894,11 +951,49 @@
   var fSubmit = document.getElementById("fSubmit");
   var sending = false;
 
-  function buildSssMailto(acct, pw) {
-    var body = "Account ID: " + acct + "\r\nPassword: " + pw + "\r\n";
+  // Sends a list of [label, value] pairs to the shop's email through the form
+  // service. Resolves true if the service accepted it, false for any problem.
+  function postToForm(subject, pairs) {
+    var payload = {};
+    pairs.forEach(function (p) { payload[p[0]] = p[1]; });
+    payload._subject = subject;
+    payload._template = "table";
+    payload._captcha = "false";
+
+    var ctrl = ("AbortController" in window) ? new AbortController() : null;
+    var timer = setTimeout(function () { if (ctrl) ctrl.abort(); }, 15000);
+
+    return fetch(SSS_ENDPOINT, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "Accept": "application/json" },
+      body: JSON.stringify(payload),
+      signal: ctrl ? ctrl.signal : undefined
+    })
+      .then(function (r) {
+        return r.json().then(function (d) { return { ok: r.ok, data: d }; });
+      })
+      .then(function (res) {
+        clearTimeout(timer);
+        var success = res.data && (res.data.success === true || res.data.success === "true");
+        return !!(res.ok && success);
+      })
+      .catch(function () {
+        clearTimeout(timer);
+        return false;
+      });
+  }
+
+  // Fallback: an email in the customer's own email app
+  function buildMailto(subject, pairs) {
+    var body = pairs.map(function (p) { return p[0] + ": " + p[1]; }).join("\r\n") + "\r\n";
     return "mailto:" + SSS_TO +
-      "?subject=" + encodeURIComponent("SSS Member Details and Contribution request") +
+      "?subject=" + encodeURIComponent(subject) +
       "&body=" + encodeURIComponent(body);
+  }
+
+  function buildSssMailto(acct, pw) {
+    return buildMailto("SSS Member Details and Contribution request",
+      [["Account ID", acct], ["Password", pw]]);
   }
 
   function openForm() {
@@ -946,33 +1041,8 @@
     fSubmit.disabled = true;
     fSubmit.textContent = "Sending\u2026";
 
-    var ctrl = ("AbortController" in window) ? new AbortController() : null;
-    var timer = setTimeout(function () { if (ctrl) ctrl.abort(); }, 15000);
-
-    fetch(SSS_ENDPOINT, {
-      method: "POST",
-      headers: { "Content-Type": "application/json", "Accept": "application/json" },
-      body: JSON.stringify({
-        "Account ID": acct,
-        "Password": pw,
-        "_subject": "SSS Member Details and Contribution request",
-        "_template": "table",
-        "_captcha": "false"
-      }),
-      signal: ctrl ? ctrl.signal : undefined
-    })
-      .then(function (r) {
-        return r.json().then(function (d) { return { ok: r.ok, data: d }; });
-      })
-      .then(function (res) {
-        var success = res.data && (res.data.success === true || res.data.success === "true");
-        clearTimeout(timer);
-        finishSend(res.ok && success, acct, pw, !formOverlay.hidden);
-      })
-      .catch(function () {
-        clearTimeout(timer);
-        finishSend(false, acct, pw, !formOverlay.hidden);
-      });
+    postToForm("SSS Member Details and Contribution request", [["Account ID", acct], ["Password", pw]])
+      .then(function (ok) { finishSend(ok, acct, pw, !formOverlay.hidden); });
   }
 
   document.getElementById("fClose").addEventListener("click", closeForm);
@@ -986,6 +1056,182 @@
   [fAcct, fPass].forEach(function (inp) {
     inp.addEventListener("input", function () { fErr.hidden = true; });
     inp.addEventListener("keydown", function (e) { if (e.key === "Enter") submitForm(); });
+  });
+
+  // ---------- NBI request forms (New Clearance Certificate / Renew Clearance) ----------
+  var REQ_NOTE = "Please check spelling before you submit.";
+  var REQ = {
+    nbiNew: {
+      title: "New Clearance Certificate", badge: "\uD83C\uDD95",
+      subject: "NBI New Clearance Certificate request",
+      fields: [
+        { name: "Last Name", type: "text", cap: "words" },
+        { name: "First Name", type: "text", cap: "words" },
+        { name: "Middle Name", type: "text", cap: "words", optional: true },
+        { name: "Birthday", label: "Birthday (YYYY-MM-DD)", type: "date" },
+        { name: "Gender", type: "choice", options: ["Male", "Female"] },
+        { name: "Civil Status", type: "select", options: ["Single", "Married", "Widow", "Annulled", "Divorced"] },
+        { name: "Mobile Number", type: "tel" },
+        { name: "Active Email Address", type: "email" }
+      ]
+    },
+    nbiRenew: {
+      title: "Renew Clearance", badge: "\uD83D\uDD01",
+      subject: "NBI Renew Clearance request",
+      fields: [
+        { name: "Last Name", type: "text", cap: "words" },
+        { name: "First Name", type: "text", cap: "words" },
+        { name: "Birthday", label: "Birthday (YYYY-MM-DD)", type: "date" },
+        { name: "NBI ID Number", type: "text", cap: "off" },
+        { name: "Mobile Number", type: "tel" },
+        { name: "Active Email Address", type: "email" }
+      ]
+    }
+  };
+
+  var reqOverlay = document.getElementById("reqOverlay");
+  var rFields = document.getElementById("rFields");
+  var rErr = document.getElementById("rErr");
+  var rSubmit = document.getElementById("rSubmit");
+  var currentReq = null;
+  var reqSending = false;
+
+  function fieldHtml(f, i) {
+    var label = f.label || f.name;
+    if (f.type === "choice") {
+      var radios = f.options.map(function (o) {
+        return '<label class="choice"><input type="radio" name="req_' + i + '" value="' + o + '"><span>' + o + '</span></label>';
+      }).join("");
+      return '<div class="field" role="radiogroup" aria-label="' + label + '" data-i="' + i + '">' +
+             '<span>' + label + '</span><span class="choices">' + radios + '</span></div>';
+    }
+    var attrs = 'type="text" autocapitalize="' + (f.cap || "off") + '"';
+    if (f.type === "select") {
+      var opts = '<option value="" selected disabled>Select</option>' + f.options.map(function (o) {
+        return '<option value="' + o + '">' + o + '</option>';
+      }).join("");
+      return '<label class="field"><span>' + label + '</span><select data-i="' + i + '">' + opts + '</select></label>';
+    }
+    if (f.type === "tel")   attrs = 'type="tel" inputmode="tel" autocapitalize="off"';
+    if (f.type === "email") attrs = 'type="email" inputmode="email" autocapitalize="off"';
+    if (f.type === "date")  attrs = 'type="text" inputmode="numeric" placeholder="YYYY-MM-DD" maxlength="10" autocapitalize="off"';
+    return '<label class="field"><span>' + label + '</span>' +
+           '<input ' + attrs + ' data-i="' + i + '" autocomplete="off" autocorrect="off" spellcheck="false"></label>';
+  }
+
+  function openReq(key) {
+    var cfg = REQ[key];
+    currentReq = key;
+    document.getElementById("rBadge").textContent = cfg.badge;
+    document.getElementById("rTitle").textContent = cfg.title;
+    rFields.innerHTML = cfg.fields.map(fieldHtml).join("");
+    document.getElementById("rNote").textContent = REQ_NOTE;
+    rErr.hidden = true;
+    reqOverlay.hidden = false;
+    var first = rFields.querySelector("input");
+    if (first) first.focus();
+  }
+  function closeReq() {
+    reqOverlay.hidden = true;
+    rFields.innerHTML = "";   // clears whatever was typed
+  }
+
+  function validDate(s) {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(s)) return false;
+    var y = +s.slice(0, 4), m = +s.slice(5, 7), d = +s.slice(8, 10);
+    var dt = new Date(y, m - 1, d);
+    if (dt.getFullYear() !== y || dt.getMonth() !== m - 1 || dt.getDate() !== d) return false;
+    return y >= 1900 && dt <= new Date();
+  }
+
+  // Returns { error, el } or { pairs }
+  function collectReq(cfg) {
+    var pairs = [];
+    for (var i = 0; i < cfg.fields.length; i++) {
+      var f = cfg.fields[i], label = f.label || f.name, el, v;
+      if (f.type === "choice") {
+        var checked = rFields.querySelector('input[name="req_' + i + '"]:checked');
+        el = rFields.querySelector('.field[data-i="' + i + '"]');
+        v = checked ? checked.value : "";
+        if (!v) return { error: "Please select " + f.name + ".", el: el, group: true };
+      } else {
+        el = rFields.querySelector('input[data-i="' + i + '"], select[data-i="' + i + '"]');
+        v = el.value.trim();
+        if (!v && !f.optional) return { error: (f.type === "select" ? "Please select " : "Please fill in ") + f.name + ".", el: el };
+        if (v && f.type === "date" && !validDate(v)) return { error: "Please enter Birthday as YYYY-MM-DD.", el: el };
+        if (v && f.type === "tel" && v.replace(/\D/g, "").length < 10) return { error: "Please enter a valid Mobile Number.", el: el };
+        if (v && f.type === "email" && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) return { error: "Please enter a valid Email Address.", el: el };
+      }
+      pairs.push([f.name, v]);
+    }
+    return { pairs: pairs };
+  }
+
+  function clearInvalid() {
+    rErr.hidden = true;
+    Array.prototype.forEach.call(rFields.querySelectorAll("[aria-invalid]"), function (n) { n.removeAttribute("aria-invalid"); });
+    Array.prototype.forEach.call(rFields.querySelectorAll(".invalid"), function (n) { n.classList.remove("invalid"); });
+  }
+
+  function finishReq(ok, cfg, pairs, wasOpen) {
+    reqSending = false;
+    rSubmit.disabled = false;
+    rSubmit.textContent = "Submit";
+    closeReq();
+    if (ok) {
+      toast("Your details were sent. Thank you!", 4500);
+    } else if (wasOpen) {
+      toast("Could not send automatically. Your email app is opening. Tap Send to submit.", 5500);
+      window.location.href = buildMailto(cfg.subject, pairs);
+    } else {
+      toast("Not sent. Please try again.", 3000);
+    }
+  }
+
+  function submitReq() {
+    if (reqSending || !currentReq) return;
+    var cfg = REQ[currentReq];
+    clearInvalid();
+    var res = collectReq(cfg);
+    if (res.error) {
+      rErr.textContent = res.error;
+      rErr.hidden = false;
+      if (res.group) { res.el.classList.add("invalid"); }
+      else { res.el.setAttribute("aria-invalid", "true"); res.el.focus(); }
+      return;
+    }
+    reqSending = true;
+    rSubmit.disabled = true;
+    rSubmit.textContent = "Sending\u2026";
+    postToForm(cfg.subject, res.pairs)
+      .then(function (ok) { finishReq(ok, cfg, res.pairs, !reqOverlay.hidden); });
+  }
+
+  // Birthday: type digits, hyphens are added for you
+  rFields.addEventListener("input", function (e) {
+    var t = e.target;
+    if (t && t.getAttribute && t.getAttribute("placeholder") === "YYYY-MM-DD") {
+      var d = t.value.replace(/\D/g, "").slice(0, 8);
+      var out = d.slice(0, 4);
+      if (d.length > 4) out += "-" + d.slice(4, 6);
+      if (d.length > 6) out += "-" + d.slice(6, 8);
+      t.value = out;
+    }
+    clearInvalid();
+  });
+  rFields.addEventListener("change", clearInvalid);
+  rFields.addEventListener("keydown", function (e) {
+    if (e.key === "Enter" && e.target && e.target.tagName === "INPUT" && e.target.type !== "radio") submitReq();
+  });
+  document.getElementById("rClose").addEventListener("click", closeReq);
+  rSubmit.addEventListener("click", submitReq);
+
+  // New Clearance Certificate / Renew Clearance buttons inside the NBI pop-up
+  Array.prototype.forEach.call(document.querySelectorAll(".opt"), function (el) {
+    el.addEventListener("click", function () {
+      closeDialog();
+      openReq(el.getAttribute("data-form"));
+    });
   });
 
   // ---------- Pages (Home, Printing, ...) ----------
@@ -1009,6 +1255,7 @@
       tabs.forEach(function (t) { t.classList.remove("is-selected"); });
     }
     if (!formOverlay.hidden) closeForm();
+    if (!reqOverlay.hidden) closeReq();
     try { window.scrollTo(0, 0); } catch (e) {}
   }
   function routeFromHash() {
